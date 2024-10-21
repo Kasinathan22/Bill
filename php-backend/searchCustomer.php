@@ -18,7 +18,8 @@ if ($conn->connect_error) {
 $searchTerm = isset($_GET['name']) ? $_GET['name'] : '';
 
 if (!empty($searchTerm)) {
-    $stmt = $conn->prepare("SELECT id, name, phone FROM customers WHERE name LIKE ? LIMIT 10");
+    // Update the query to include email and gstin
+    $stmt = $conn->prepare("SELECT id, name, phone, email, gstin FROM customers WHERE name LIKE ? LIMIT 10");
     $likeTerm = "%" . $searchTerm . "%";
     $stmt->bind_param("s", $likeTerm);
     $stmt->execute();
@@ -26,7 +27,7 @@ if (!empty($searchTerm)) {
 
     $customers = [];
     while ($row = $result->fetch_assoc()) {
-        $customers[] = $row;
+        $customers[] = $row; // Fetch name, phone, email, gstin
     }
 
     echo json_encode($customers);
