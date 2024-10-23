@@ -11,27 +11,31 @@ const NewCustomer = () => {
   const [email, setEmail] = useState("");
   const [gstin, setGstin] = useState("");
 
-  const toggleBusinessDetails = () => setShowBusinessDetails(!showBusinessDetails);
+  const toggleBusinessDetails = () =>
+    setShowBusinessDetails(!showBusinessDetails);
 
   const handleSave = async (event) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault(); // Prevent form default submission
 
     try {
-      const response = await fetch("http://localhost/php-backend/save_customer.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          name,
-          phone,
-          email,
-          gstin,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost/php-backend/save_customer.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            name,
+            phone,
+            email,
+            gstin,
+          }),
+        }
+      );
 
       const data = await response.json();
-      console.log(data); // Log the response for debugging
+      console.log(data); // For debugging
 
       if (data.success) {
         alert(data.message);
@@ -41,6 +45,7 @@ const NewCustomer = () => {
       }
     } catch (error) {
       console.error("Error saving customer:", error);
+      alert("An error occurred while saving the customer.");
     }
   };
 
@@ -56,6 +61,7 @@ const NewCustomer = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
           <input
             type="text"
@@ -63,6 +69,7 @@ const NewCustomer = () => {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
           <input
             type="email"
@@ -70,6 +77,7 @@ const NewCustomer = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
         </div>
 
@@ -77,20 +85,20 @@ const NewCustomer = () => {
           className="cursor-pointer text-blue-600 mb-4"
           onClick={toggleBusinessDetails}
         >
-          {showBusinessDetails ? "▾ Business, GSTIN Details" : "▸ Business, GSTIN Details"}
+          {showBusinessDetails
+            ? "▾ Business, GSTIN Details"
+            : "▸ Business, GSTIN Details"}
         </div>
 
         {showBusinessDetails && (
           <div className="mb-6">
-            <div className="flex gap-4 mb-4">
-              <input
-                type="text"
-                placeholder="Enter 15-digit GSTIN number"
-                value={gstin}
-                onChange={(e) => setGstin(e.target.value)}
-                className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Enter 15-digit GSTIN number"
+              value={gstin}
+              onChange={(e) => setGstin(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
           </div>
         )}
 
@@ -107,13 +115,18 @@ const NewCustomer = () => {
             <button
               type="button"
               className="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50"
+              onClick={() => {
+                setName("");
+                setPhone("");
+                setEmail("");
+                setGstin("");
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              onClick={() => router.back()}
             >
               Save
             </button>

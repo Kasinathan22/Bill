@@ -15,44 +15,38 @@ $user = 'root';
 $password = '';
 
 $conn = new mysqli($host, $user, $password, $db);
+
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
 }
 
-$name = $_POST['name'];
-$phone = $_POST['phone'];
-$email = $_POST['email'];
-$gstin = $_POST['gstin'];
+$name = $_POST['name'] ?? '';
+$phone = $_POST['phone'] ?? '';
+$email = $_POST['email'] ?? '';
+$gstin = $_POST['gstin'] ?? '';
+
+if (empty($name) || empty($phone) || empty($email) || empty($gstin)) {
+    echo json_encode(["success" => false, "message" => "All fields are required."]);
+    exit;
+}
 
 $sql = "INSERT INTO customers (name, phone, email, gstin) VALUES (?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    echo json_encode(["success" => false, "message" => "SQL error: " . $conn->error]);
+    exit;
+}
+
 $stmt->bind_param("ssss", $name, $phone, $email, $gstin);
 
 if ($stmt->execute()) {
     echo json_encode(["success" => true, "message" => "Customer saved successfully."]);
 } else {
-    echo json_encode(["success" => false, "message" => "Failed to save customer."]);
+    echo json_encode(["success" => false, "message" => "Failed to save customer: " . $stmt->error]);
 }
-
-$sql = "SET @row_number = 0;
-        SELECT (@row_number := @row_number + 1) AS id, name, phone, email, gstin
-        FROM customers
-        ORDER BY id;";
-
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    $customers = [];
-    while($row = $result->fetch_assoc()) {
-        $customers[] = $row;
-    }
-    echo json_encode($customers);
-} else {
-    echo json_encode(["message" => "No customers found."]);
-}
-
-
 
 $stmt->close();
 $conn->close();
+
 ?>
