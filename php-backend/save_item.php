@@ -4,10 +4,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Set CORS headers to allow requests from frontend
+header("Access-Control-Allow-Origin: http://localhost:3000"); // Replace with your frontend URL if different
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Adjust methods as needed
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
+header("Content-Type: application/json");
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header("HTTP/1.1 204 No Content");
@@ -16,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // Database connection details
 $host = 'localhost';
-$db = 'customers_db';
+$db = 'inventory';
 $user = 'root';
 $password = ''; // Update if your MySQL has a password
 
@@ -25,19 +26,28 @@ $conn = new mysqli($host, $user, $password, $db);
 
 // Check connection
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
+    exit();
 }
+
 // Parse JSON body from the request
 $requestPayload = file_get_contents("php://input");
 $data = json_decode($requestPayload, true);
 
-$itemType = $data['itemType'] ?? '';
-$itemName = $data['itemName'] ?? '';
-$description = $data['description'] ?? '';
-$price = $data['price'] ?? 0;
-$unit = $data['unit'] ?? '';
-$discount = $data['discount'] ?? 0;
-$discountType = $data['discountType'] ?? '%';
+// Check for JSON parsing errors
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(["success" => false, "message" => "Invalid JSON data."]);
+    exit();
+}
+
+// Extract and sanitize input data
+$itemType = isset($data['itemType']) ? htmlspecialchars(trim($data['itemType'])) : '';
+$itemName = isset($data['itemName']) ? htmlspecialchars(trim($data['itemName'])) : '';
+$description = isset($data['description']) ? htmlspecialchars(trim($data['description'])) : '';
+$price = isset($data['price']) ? floatval($data['price']) : 0.0;
+$unit = isset($data['unit']) ? htmlspecialchars(trim($data['unit'])) : '';
+$discount = isset($data['discount']) ? floatval($data['discount']) : 0.0;
+$discountType = isset($data['discountType']) ? htmlspecialchars(trim($data['discountType'])) : '%';
 
 // Validate required fields
 if (empty($itemName) || empty($price) || empty($unit)) {
@@ -57,7 +67,8 @@ if (!$stmt) {
 }
 
 // Bind parameters
-$stmt->bind_param("sssdsds", $itemType, $itemName, $description, $price, $unit, $discount, $discountType);
+// Data Types: s - string, d - double
+$stmt->bind_param("sssdssd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType);
 
 // Execute the statement
 if ($stmt->execute()) {
