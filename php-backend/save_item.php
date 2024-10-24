@@ -9,6 +9,7 @@ header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Adjust methods as needed
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
+
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header("HTTP/1.1 204 No Content");
@@ -48,16 +49,19 @@ $price = isset($data['price']) ? floatval($data['price']) : 0.0;
 $unit = isset($data['unit']) ? htmlspecialchars(trim($data['unit'])) : '';
 $discount = isset($data['discount']) ? floatval($data['discount']) : 0.0;
 $discountType = isset($data['discountType']) ? htmlspecialchars(trim($data['discountType'])) : '%';
+$hsnCode = isset($data['hsnCode']) ? htmlspecialchars(trim($data['hsnCode'])) : '';
+$gstRate = isset($data['gstRate']) ? floatval($data['gstRate']) : 0.0;
+$cessRate = isset($data['cessRate']) ? floatval($data['cessRate']) : 0.0;
 
 // Validate required fields
-if (empty($itemName) || empty($price) || empty($unit)) {
-    echo json_encode(["success" => false, "message" => "Item name, price, and unit are required."]);
+if (empty($itemName) || empty($price) || empty($unit) || empty($hsnCode) || $gstRate <= 0) {
+    echo json_encode(["success" => false, "message" => "Item name, price, unit, HSN Code, and GST rate are required."]);
     exit();
 }
 
 // Prepare SQL statement
-$sql = "INSERT INTO items (item_type, name, description, price, unit, discount, discount_type) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO items (item_type, name, description, price, unit, discount, discount_type, hsn_code, gst_rate, cess_rate) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
 
@@ -68,7 +72,7 @@ if (!$stmt) {
 
 // Bind parameters
 // Data Types: s - string, d - double
-$stmt->bind_param("sssdssd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType);
+$stmt->bind_param("sssdssdidd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType, $hsnCode, $gstRate, $cessRate);
 
 // Execute the statement
 if ($stmt->execute()) {

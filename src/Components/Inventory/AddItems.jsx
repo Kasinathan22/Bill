@@ -12,16 +12,17 @@ const AddItems = ({ onClose, onItemAdded }) => {
   const [unit, setUnit] = useState("kilograms");
   const [discount, setDiscount] = useState("");
   const [discountType, setDiscountType] = useState("%");
-  const [loading, setLoading] = useState(false); // For submission state
-  const [error, setError] = useState(null); // For error handling
+  const [hsnCode, setHsnCode] = useState(""); // HSN Code
+  const [gstRate, setGstRate] = useState(""); // GST Rate
+  const [cessRate, setCessRate] = useState(""); // Cess Rate
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSave = async (event) => {
-    event.preventDefault(); // Prevent page refresh
-    console.log("Form submitted!"); // Confirm the function is called
+    event.preventDefault();
 
-    // Basic validation
-    if (!itemName || !price || !unit) {
-      alert("Item name, price, and unit are required.");
+    if (!itemName || !price || !unit || !hsnCode || !gstRate) {
+      alert("Please fill in all required fields.");
       return;
     }
 
@@ -33,6 +34,9 @@ const AddItems = ({ onClose, onItemAdded }) => {
       unit,
       discount: discount ? parseFloat(discount) : 0,
       discountType,
+      hsnCode,
+      gstRate: parseFloat(gstRate),
+      cessRate: cessRate ? parseFloat(cessRate) : 0,
     };
 
     setLoading(true);
@@ -47,21 +51,19 @@ const AddItems = ({ onClose, onItemAdded }) => {
         body: JSON.stringify(dataToSend),
       });
 
-      const data = await response.json(); // Ensure JSON parsing
-
+      const data = await response.json();
       console.log("Response from backend:", data);
 
       if (data.success) {
         alert(data.message);
-        onItemAdded(); // Trigger refetching items
-        onClose(); // Close the modal after submission
+        onItemAdded();
+        onClose();
       } else {
         alert(data.message || "Failed to save item.");
       }
     } catch (error) {
       console.error("Error saving item:", error);
       setError("An error occurred while saving the item.");
-      alert("An error occurred while saving the item.");
     } finally {
       setLoading(false);
     }
@@ -157,6 +159,47 @@ const AddItems = ({ onClose, onItemAdded }) => {
             </select>
           </div>
 
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">HSN Code *</label>
+            <input
+              type="text"
+              placeholder="Eg. 1234"
+              value={hsnCode}
+              onChange={(e) => setHsnCode(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
+              required
+            />
+          </div>
+
+          <div className="flex space-x-4 mb-4">
+            <div className="w-1/2">
+              <label className="block text-sm font-medium mb-1">GST Rate (%) *</label>
+              <input
+                type="number"
+                placeholder="18"
+                value={gstRate}
+                onChange={(e) => setGstRate(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="w-1/2">
+              <label className="block text-sm font-medium mb-1">Cess Rate (%)</label>
+              <input
+                type="number"
+                placeholder="0"
+                value={cessRate}
+                onChange={(e) => setCessRate(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
           <div className="flex space-x-4 mb-4">
             <div className="w-1/2">
               <label className="block text-sm font-medium mb-1">Discount</label>
@@ -170,6 +213,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
                 step="0.01"
               />
             </div>
+
             <div className="w-1/2">
               <label className="block text-sm font-medium mb-1">Discount Type</label>
               <select

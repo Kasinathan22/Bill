@@ -1,27 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Sidebar from "./Sidebar";
-import AddItems from "./AddItems"; // Ensure the correct import path
-
-const truncateText = (text, maxLength) =>
-  text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+import Sidebar from "./Sidebar"; // Ensure correct path
+import AddItems from "./AddItems"; // Ensure correct path
 
 export default function Inventory() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     searchTerm: "",
-    goods: false,
-    services: false,
     lowQuantity: false,
     outOfStock: false,
+    goods: false,
+    services: false,
   });
-  const [items, setItems] = useState([]); // Initialize items state
-  const [loading, setLoading] = useState(false); // For loading state
-  const [error, setError] = useState(null); // For error handling
 
-  const handleFilterChange = (newFilters) => setFilters(newFilters);
+  const [items, setItems] = useState([]); // All fetched items
+  const [filteredItems, setFilteredItems] = useState([]); // Filtered items to display
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Function to fetch items from the backend
   const fetchItems = async () => {
     setLoading(true);
     setError(null);
@@ -34,14 +30,9 @@ export default function Inventory() {
       });
 
       const data = await response.json();
-
       if (data.success) {
-        // Convert price to number if necessary
-        const fetchedItems = data.items.map((item) => ({
-          ...item,
-          price: parseFloat(item.price),
-        }));
-        setItems(fetchedItems);
+        setItems(data.items);
+        setFilteredItems(data.items); // Set initial filtered items
       } else {
         setError(data.message || "Failed to fetch items.");
       }
@@ -53,57 +44,66 @@ export default function Inventory() {
     }
   };
 
-  // Fetch items on component mount
   useEffect(() => {
     fetchItems();
   }, []);
 
-  const filteredItems = items.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-    const matchesType =
-      (!filters.goods && !filters.services) ||
-      (filters.goods && item.type.toLowerCase() === "goods") ||
-      (filters.services && item.type.toLowerCase() === "service");
-    const matchesStock =
-      (!filters.lowQuantity && !filters.outOfStock) ||
-      (filters.lowQuantity && item.unit.toLowerCase() === "unt") || // Example condition for low quantity
-      (filters.outOfStock && item.price === 700.0); // Example condition for out of stock
+  useEffect(() => {
+    applyFilters();
+  }, [filters, items]);
 
-    return matchesSearch && matchesType && matchesStock;
-  });
+  const applyFilters = () => {
+    const { searchTerm, lowQuantity, outOfStock, goods, services } = filters;
 
-  // Function to open the modal
-  const openModal = () => {
-    setIsModalOpen(true);
+    const filtered = items.filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesLowQuantity = lowQuantity ? item.quantity < 10 : true;
+      const matchesOutOfStock = outOfStock ? item.quantity === 0 : true;
+      const matchesGoods = goods ? item.item_type.toLowerCase() === "goods" : true;
+      const matchesServices = services ? item.item_type.toLowerCase() === "service" : true;
+
+      return (
+        matchesSearch &&
+        matchesLowQuantity &&
+        matchesOutOfStock &&
+        matchesGoods &&
+        matchesServices
+      );
+    });
+
+    setFilteredItems(filtered);
   };
 
-  // Function to close the modal
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const handleFilterChange = (newFilters) => {
+    setFilters((prevFilters) => ({ ...prevFilters, ...newFilters }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      searchTerm: "",
+      lowQuantity: false,
+      outOfStock: false,
+      goods: false,
+      services: false,
+    });
   };
 
   return (
     <div className="flex space-x-4 pt-20">
-      <Sidebar onFilterChange={handleFilterChange} />
+      <Sidebar onFilterChange={handleFilterChange} clearFilters={clearFilters} />
+
       <div className="p-4 w-full">
         <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-gray-500">
-            <span className="font-medium">ITEM TYPE</span>
-          </div>
-          <div>
-            <button className="px-4 py-2 bg-gray-100 border rounded-md mr-2">
-              Actions
-            </button>
-
-            <button
-              onClick={openModal}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md"
-            >
-              Add an Item
-            </button>
-
-            {isModalOpen && <AddItems onClose={closeModal} onItemAdded={fetchItems} />}
-          </div>
+          <h2 className="text-lg font-bold">Inventory</h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
+            Add an Item
+          </button>
+          {isModalOpen && (
+            <AddItems onClose={() => setIsModalOpen(false)} onItemAdded={fetchItems} />
+          )}
         </div>
 
         {loading && <p className="text-center">Loading items...</p>}
@@ -113,49 +113,42 @@ export default function Inventory() {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border px-4 py-2">
-                  <input type="checkbox" />
-                </th>
                 <th className="border px-4 py-2">Item Name</th>
                 <th className="border px-4 py-2">Item Type</th>
-                <th className="border px-4 py-2">Price/Unit</th>
+                <th className="border px-4 py-2">HSN/SAC Code</th>
+                <th className="border px-4 py-2">Price</th>
                 <th className="border px-4 py-2">Unit</th>
-                <th className="border px-4 py-2">Quantity</th>
-                <th className="border px-4 py-2">SKU</th>
-                <th className="border px-4 py-2">HSN/SAC</th>
-                <th className="border px-4 py-2">Action</th>
+                
+                <th className="border px-4 py-2">GST Rate (%)</th>
+                <th className="border px-4 py-2">Cess Rate (%)</th>
+                <th className="border px-4 py-2">Discount</th>
+                {/* <th className="border px-4 py-2">Discount Type</th> */}
               </tr>
             </thead>
             <tbody>
-              {filteredItems.length > 0 ? (
-                filteredItems.map((item, index) => (
-                  <tr key={index}>
-                    <td className="border px-4 py-2">
-                      <input type="checkbox" />
-                    </td>
-                    <td className="border px-4 py-2">
-                      {truncateText(item.name, 20)}
-                    </td>
-                    <td className="border px-4 py-2">{item.type}</td>
-                    <td className="border px-4 py-2">{`₹${item.price.toLocaleString('en-IN', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}</td>
-                    <td className="border px-4 py-2">{item.unit}</td>
-                    <td className="border px-4 py-2">-</td>
-                    <td className="border px-4 py-2">-</td>
-                    <td className="border px-4 py-2">-</td>
-                    <td className="border px-4 py-2">-</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td className="border px-4 py-2 text-center" colSpan="9">
-                    No items found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  {filteredItems.length > 0 ? (
+    filteredItems.map((item, index) => (
+      <tr key={index}>
+        <td className="border px-4 py-2">{item.name}</td>
+        <td className="border px-4 py-2">{item.item_type}</td>
+        <td className="border px-4 py-2">{item.hsn_sac || "N/A"}</td>
+        <td className="border px-4 py-2">₹{item.price}</td>
+        <td className="border px-4 py-2">{item.unit}</td>
+        <td className="border px-4 py-2">{item.gst_rate || "0.00"}%</td>
+        <td className="border px-4 py-2">{item.cess_rate || "0.00"}%</td>
+        <td className="border px-4 py-2">{item.discount || "0.00"}</td>
+        {/* <td className="border px-4 py-2">{item.discount_type || "N/A"}</td> */}
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td className="border px-4 py-2 text-center" colSpan="9">
+        No items found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
           </table>
         )}
       </div>
