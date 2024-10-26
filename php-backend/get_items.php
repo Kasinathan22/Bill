@@ -38,7 +38,7 @@ if ($conn->connect_error) {
 }
 
 // Query to fetch items from the database
-$sql = "SELECT item_type, name, hsn_code AS hsn_sac, price, unit, 
+$sql = "SELECT id, item_type, name, hsn_code AS hsn_sac, price, unit, 
         gst_rate, cess_rate, discount, discount_type FROM items";
 
 $result = $conn->query($sql);
