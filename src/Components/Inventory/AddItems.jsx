@@ -21,7 +21,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
   const handleSave = async (event) => {
     event.preventDefault();
 
-    if (!itemName || !price || !unit || !hsnCode || !gstRate) {
+    if (!itemName || !price || !unit || !hsnCode) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -130,7 +130,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
             ></textarea>
           </div>
-<div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4">
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Price per unit *</label>
             <input
@@ -175,16 +175,14 @@ const AddItems = ({ onClose, onItemAdded }) => {
 
           <div className="flex space-x-4 mb-4">
             <div className="w-1/2">
-              <label className="block text-sm font-medium mb-1">GST Rate (%) *</label>
+              <label className="block text-sm font-medium mb-1">GST Rate (%) </label>
               <input
                 type="number"
                 placeholder="18"
                 value={gstRate}
                 onChange={(e) => setGstRate(e.target.value)}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
-                required
-                min="0"
-                step="0.01"
+                
               />
             </div>
 

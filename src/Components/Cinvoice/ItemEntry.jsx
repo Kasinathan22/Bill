@@ -1,179 +1,193 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
+import debounce from 'lodash.debounce'; // Optional: You can use lodash for debouncing
 
-const ItemEntry = ({ onTotalChange }) => {
-  const [items, setItems] = useState([
-    { id: 1, name: '', hsn: '', qty: 0, unit: '', price: 0, discount: 0, gst: 0, cess: 0, total: 0 },
+export default function ItemEntry() {
+  const [rows, setRows] = useState([
+    {
+      itemName: '',
+      hsn: '',
+      quantity: '',
+      unit: '',
+      price: '₹ 0.0',
+      discount: '₹ 0',
+      gst: '₹ 0',
+      cess: '₹ 0',
+      taxableAmt: '₹ 0',
+      amount: '₹ 0',
+    },
   ]);
 
-  const addItem = () => {
-    setItems([
-      ...items,
-      { id: items.length + 1, name: '', hsn: '', qty: 0, unit: '', price: 0, discount: 0, gst: 0, cess: 0, total: 0 },
+  const [items, setItems] = useState([]);
+
+  // Fetch items from the server
+  useEffect(() => {
+    fetch('http://localhost/php-backend/get_items.php') // Update this URL to your actual endpoint
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) setItems(data.items);
+      })
+      .catch((error) => console.error('Error fetching items:', error));
+  }, []);
+
+  const handleAddRow = () => {
+    setRows([
+      ...rows,
+      {
+        itemName: '',
+        hsn: '',
+        quantity: '',
+        unit: '',
+        price: '₹ 0.0',
+        discount: '₹ 0',
+        gst: '₹ 0',
+        cess: '₹ 0',
+        taxableAmt: '₹ 0',
+        amount: '₹ 0',
+      },
     ]);
   };
 
-  const handleInputChange = (index, field, value) => {
-    const updatedItems = [...items];
-    updatedItems[index][field] = value;
-
-    // Recalculate total
-    const { qty, price, discount, gst, cess } = updatedItems[index];
-    updatedItems[index].total =
-      qty * price - discount + parseFloat(gst) + parseFloat(cess);
-
-    setItems(updatedItems);
-
-    // Calculate total amount and pass it to parent component
-    const totalAmount = updatedItems.reduce((sum, item) => sum + item.total, 0);
-    onTotalChange(totalAmount);
+  const handleDeleteRow = (index) => {
+    const newRows = rows.filter((_, i) => i !== index);
+    setRows(newRows);
   };
 
-  const removeItem = (index) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
-
-    // Update total amount after removing an item
-    const totalAmount = updatedItems.reduce((sum, item) => sum + item.total, 0);
-    onTotalChange(totalAmount);
-  };
-
-  const handleSaveInvoice = () => {
-    if (selectedCustomer) {
-        setIsInvoiceSaved(true); // Set the state to true on save click
-        
-        // Construct the query string using URLSearchParams
-        const query = new URLSearchParams({
-            name: selectedCustomer.name,
-            phone: selectedCustomer.phone,
-            email: selectedCustomer.email,
-            gstin: selectedCustomer.gstin,
-        }).toString();
-
-        // Redirect to the next page with customer details
-        router.push(`/savedinvoice?${query}`);
+  // Use debounce to limit how often `onItemInputChange` runs
+  const onItemInputChange = debounce((index, value) => {
+    const selectedItem = items.find((item) => item.name.toLowerCase() === value.toLowerCase());
+    const newRows = [...rows];
+    if (selectedItem) {
+      newRows[index] = {
+        ...newRows[index],
+        itemName: selectedItem.name,
+        hsn: selectedItem.hsn_sac,
+        price: `₹ ${selectedItem.price}`,
+        discount: `₹ ${selectedItem.discount}`,
+        gst: `₹ ${selectedItem.gst_rate}`,
+        cess: `₹ ${selectedItem.cess_rate}`,
+        unit: selectedItem.unit,
+      };
     } else {
-        alert("Please select a customer before saving the invoice.");
+      newRows[index].itemName = value;
     }
-};
+    setRows(newRows);
+  }, 300); // Adjust debounce timing as needed
 
+  const handleInputChange = (index, field, value) => {
+    const newRows = [...rows];
+    newRows[index][field] = value;
+    setRows(newRows);
+  };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-xl font-semibold mb-4">Items</h1>
-      <div className="overflow-x-auto">
-        <table className="w-full border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 p-2">#</th>
-              <th className="border border-gray-300 p-2">Item Name</th>
-              <th className="border border-gray-300 p-2">HSN</th>
-              <th className="border border-gray-300 p-2">Quantity</th>
-              <th className="border border-gray-300 p-2">Unit</th>
-              <th className="border border-gray-300 p-2">Price/Unit</th>
-              <th className="border border-gray-300 p-2">Discount</th>
-              <th className="border border-gray-300 p-2">GST</th>
-              <th className="border border-gray-300 p-2">CESS</th>
-              <th className="border border-gray-300 p-2">Total</th>
-              <th className="border border-gray-300 p-2">Actions</th>
+    <div className="p-4 bg-white rounded-md shadow-md">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Items</h2>
+
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="text-left text-gray-500 text-xs">
+            <th className="p-2 border border-gray-300 font-medium">#</th>
+            <th className="p-2 border border-gray-300 font-medium">ITEM NAME *</th>
+            <th className="p-2 border border-gray-300 font-medium">HSN *</th>
+            <th className="p-2 border border-gray-300 font-medium">QUANTITY *</th>
+            <th className="p-2 border border-gray-300 font-medium">UNIT *</th>
+            <th className="p-2 border border-gray-300 font-medium">PRICE/UNIT*</th>
+            <th className="p-2 border border-gray-300 font-medium">DISCOUNT</th>
+            <th className="p-2 border border-gray-300 font-medium">GST</th>
+            <th className="p-2 border border-gray-300 font-medium">CESS</th>
+            <th className="p-2 border border-gray-300 font-medium">TAXABLE AMT</th>
+            <th className="p-2 border border-gray-300 font-medium">AMOUNT</th>
+            <th className="p-2 border border-gray-300 font-medium">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr key={index} className="bg-gray-50 text-gray-700">
+              <td className="p-2 border border-gray-300">{index + 1}</td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  list={`item-options-${index}`}
+                  placeholder="Start by typing first item name here"
+                  className="w-full bg-transparent outline-none placeholder-gray-400"
+                  value={row.itemName}
+                  onChange={(e) => onItemInputChange(index, e.target.value)}
+                />
+                <datalist id={`item-options-${index}`}>
+                  {items.map((item) => (
+                    <option key={item.id} value={item.name} />
+                  ))}
+                </datalist>
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none placeholder-gray-400"
+                  value={row.hsn}
+                  onChange={(e) => handleInputChange(index, 'hsn', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="number"
+                  placeholder="Quantity"
+                  className="w-full bg-transparent outline-none placeholder-gray-400"
+                  value={row.quantity}
+                  onChange={(e) => handleInputChange(index, 'quantity', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none"
+                  value={row.unit}
+                  onChange={(e) => handleInputChange(index, 'unit', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none"
+                  value={row.price}
+                  onChange={(e) => handleInputChange(index, 'price', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none"
+                  value={row.discount}
+                  onChange={(e) => handleInputChange(index, 'discount', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">
+                <input
+                  type="text"
+                  className="w-full bg-transparent outline-none"
+                  value={row.gst}
+                  onChange={(e) => handleInputChange(index, 'gst', e.target.value)}
+                />
+              </td>
+              <td className="p-2 border border-gray-300">{row.cess}</td>
+              <td className="p-2 border border-gray-300">{row.price}</td>
+              <td className="p-2 border border-gray-300">{row.amount}</td>
+              <td className="p-2 border border-gray-300">
+                <button
+                  className="text-red-500"
+                  onClick={() => handleDeleteRow(index)}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {items.map((item, index) => (
-              <tr key={item.id}>
-                <td className="border border-gray-300 p-2 text-center">{item.id}</td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-fullrounded-md p-1"
-                    value={item.name}
-                    onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                    placeholder="Enter item name"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.hsn}
-                    onChange={(e) => handleInputChange(index, 'hsn', e.target.value)}
-                    placeholder="HSN"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.qty}
-                    onChange={(e) => handleInputChange(index, 'qty', parseFloat(e.target.value))}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.unit}
-                    onChange={(e) => handleInputChange(index, 'unit', e.target.value)}
-                    placeholder="Unit"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.price}
-                    onChange={(e) => handleInputChange(index, 'price', parseFloat(e.target.value))}
-                    step="0.01"
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.discount}
-                    onChange={(e) => handleInputChange(index, 'discount', parseFloat(e.target.value))}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.gst}
-                    onChange={(e) => handleInputChange(index, 'gst', parseFloat(e.target.value))}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="number"
-                    className="w-full border border-gray-300 rounded-md p-1"
-                    value={item.cess}
-                    onChange={(e) => handleInputChange(index, 'cess', parseFloat(e.target.value))}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  {item.total.toFixed(2)}
-                </td>
-                <td className="border border-gray-300 p-2 text-center">
-                  <button
-                    onClick={() => removeItem(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="p-2 border-t mt-4 text-center">
+        <button onClick={handleAddRow} className="text-blue-600">+ ADD ITEM</button>
       </div>
-      <button
-        onClick={addItem}
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        + Add Item
-      </button>
     </div>
   );
-};
-
-export default ItemEntry;
+}

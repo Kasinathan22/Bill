@@ -54,8 +54,8 @@ $gstRate = isset($data['gstRate']) ? floatval($data['gstRate']) : 0.0;
 $cessRate = isset($data['cessRate']) ? floatval($data['cessRate']) : 0.0;
 
 // Validate required fields
-if (empty($itemName) || empty($price) || empty($unit) || empty($hsnCode) || $gstRate <= 0) {
-    echo json_encode(["success" => false, "message" => "Item name, price, unit, HSN Code, and GST rate are required."]);
+if (empty($itemName) || empty($price) || empty($unit) || empty($hsnCode)) {
+    echo json_encode(["success" => false, "message" => "Item name, price, unit, and HSN Code are required."]);
     exit();
 }
 
@@ -70,8 +70,7 @@ if (!$stmt) {
     exit();
 }
 
-// Bind parameters
-// Data Types: s - string, d - double
+// Bind parameters (Data Types: s - string, d - double)
 $stmt->bind_param("sssdssdidd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType, $hsnCode, $gstRate, $cessRate);
 
 // Execute the statement
