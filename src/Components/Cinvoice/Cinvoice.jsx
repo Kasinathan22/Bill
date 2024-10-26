@@ -50,15 +50,7 @@ const Cinvoice = () => {
         setSelectedCustomer(null);
     };
 
-    // const handleSaveInvoice = () => {
-    //     if (selectedCustomer) {
-    //         setIsInvoiceSaved(true); // Set the state to true on save click
-    //     } else {
-    //         alert("Please select a customer before saving the invoice.");
-    //     }
-    // };
-   
-    const handleSaveInvoice = () => {
+ const handleSaveInvoice = () => {
         if (selectedCustomer) {
             setIsInvoiceSaved(true); // Set the state to true on save click
             

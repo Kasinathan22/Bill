@@ -71,7 +71,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-8 w-full max-w-lg rounded-lg shadow-md relative">
+      <div className="bg-white p-8 w-11/12  rounded-lg shadow-md relative">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
@@ -130,7 +130,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
             ></textarea>
           </div>
-
+<div className="grid grid-cols-3 gap-4">
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Price per unit *</label>
             <input
@@ -156,6 +156,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
               <option value="kilograms">Kilograms</option>
               <option value="liters">Liters</option>
               <option value="units">Units</option>
+           
             </select>
           </div>
 
@@ -169,6 +170,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
               required
             />
+          </div>
           </div>
 
           <div className="flex space-x-4 mb-4">
@@ -198,9 +200,8 @@ const AddItems = ({ onClose, onItemAdded }) => {
                 step="0.01"
               />
             </div>
-          </div>
-
-          <div className="flex space-x-4 mb-4">
+          
+        
             <div className="w-1/2">
               <label className="block text-sm font-medium mb-1">Discount</label>
               <input
@@ -214,18 +215,19 @@ const AddItems = ({ onClose, onItemAdded }) => {
               />
             </div>
 
-            <div className="w-1/2">
+            <div className="w-40">
               <label className="block text-sm font-medium mb-1">Discount Type</label>
               <select
                 value={discountType}
                 onChange={(e) => setDiscountType(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
+                className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
               >
                 <option value="%">%</option>
                 <option value="₹">₹</option>
               </select>
             </div>
-          </div>
+            </div>
+        
 
           {loading && <p className="text-center text-blue-500">Saving item...</p>}
           {error && <p className="text-center text-red-500">{error}</p>}

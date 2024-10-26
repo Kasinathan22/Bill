@@ -61,8 +61,8 @@ const EditItem = ({ item, onSubmit, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-md shadow-lg w-96">
+    <div className="fixed inset-0 bg-black bg-opacity-50 w-screen h-screen flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-md shadow-lg w-11/12">
         <h2 className="text-xl font-bold mb-4">Edit Item</h2>
 
         <form onSubmit={handleSubmit}>
@@ -82,20 +82,24 @@ const EditItem = ({ item, onSubmit, onClose }) => {
 
           {/* Item Type */}
           <div className="mb-4">
-            <label className="block text-gray-700">Item Type</label>
-            <input
-              type="text"
-              name="item_type"
-              value={formData.item_type}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            />
-          </div>
+  <label className="block text-gray-700">Item Type</label>
+  <select
+    name="item_type"
+    value={formData.item_type}
+    onChange={handleChange}
+    className="w-full p-2 border rounded-md"
+    required
+  >
+    <option value="kilograms">Kilograms</option>
+    <option value="liters">Liters</option>
+    <option value="units">Units</option>
+  </select>
+</div>
 
+          <div className="grid grid-cols-3 gap-4">
           {/* HSN/SAC Code */}
           <div className="mb-4">
-            <label className="block text-gray-700">HSN/SAC Code</label>
+            <label className="block text-gray-700 ">HSN/SAC Code</label>
             <input
               type="text"
               name="hsn_sac"
@@ -129,8 +133,10 @@ const EditItem = ({ item, onSubmit, onClose }) => {
               className="w-full p-2 border rounded-md"
             />
           </div>
+          </div>
 
           {/* GST Rate */}
+          <div className="grid grid-cols-3 gap-4">
           <div className="mb-4">
             <label className="block text-gray-700">GST Rate (%)</label>
             <input
@@ -164,6 +170,7 @@ const EditItem = ({ item, onSubmit, onClose }) => {
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
             />
+          </div>
           </div>
 
           {/* Action Buttons */}
