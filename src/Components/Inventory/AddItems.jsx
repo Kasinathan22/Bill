@@ -212,18 +212,33 @@ const AddItems = ({ onClose, onItemAdded }) => {
                 step="0.01"
               />
             </div>
+            <div className="flex space-x-6 mb-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="discountType"
+                value="%"
+                checked={discountType === "%"}
+                onChange={() => setDiscountType("%")}
+                className="form-radio h-5 w-5 text-indigo-600"
+                required
+              />
+              <span className="ml-2 text-sm font-medium">%</span>
+            </label>
 
-            <div className="w-40">
-              <label className="block text-sm font-medium mb-1">Discount Type</label>
-              <select
-                value={discountType}
-                onChange={(e) => setDiscountType(e.target.value)}
-                className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring focus:ring-indigo-300"
-              >
-                <option value="%">%</option>
-                <option value="₹">₹</option>
-              </select>
-            </div>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="discountType"
+                value="₹"
+                checked={discountType === "₹"}
+                onChange={() => setDiscountType("₹")}
+                className="form-radio h-5 w-5 text-indigo-600"
+                required
+              />
+              <span className="ml-2 text-sm font-medium">₹</span>
+            </label>
+          </div>
             </div>
         
 

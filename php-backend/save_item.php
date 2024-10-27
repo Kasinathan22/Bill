@@ -71,7 +71,7 @@ if (!$stmt) {
 }
 
 // Bind parameters (Data Types: s - string, d - double)
-$stmt->bind_param("sssdssdidd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType, $hsnCode, $gstRate, $cessRate);
+$stmt->bind_param("sssdsssidd", $itemType, $itemName, $description, $price, $unit, $discount, $discountType, $hsnCode, $gstRate, $cessRate);
 
 // Execute the statement
 if ($stmt->execute()) {
