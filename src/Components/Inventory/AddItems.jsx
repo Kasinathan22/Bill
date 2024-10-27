@@ -213,6 +213,7 @@ const AddItems = ({ onClose, onItemAdded }) => {
               />
             </div>
             <div className="flex space-x-6 mb-4">
+              <h1>Discount Type</h1>
             <label className="flex items-center">
               <input
                 type="radio"
