@@ -1,32 +1,29 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import debounce from 'lodash.debounce'; // Optional: You can use lodash for debouncing
+import debounce from 'lodash.debounce';
 
-export default function ItemEntry({ setTotalAmount }) {
-  const [rows, setRows] = useState([
-    {
-      itemName: '',
-      hsn: '',
-      quantity: '',
-      unit: '',
-      price: '₹ 0.0',
-      discount: '0',
-      discount_type: '',
-      gst: '0',
-      cess: '0',
-      taxableAmt: '₹ 0',
-      amount: '₹ 0',
-    },
-  ]);
+export default function ItemEntry({ setTotalAmount = () => {}, items = [], setItems = () => {} }) {
+  const [rows, setRows] = useState(items.length > 0 ? items : [{
+    itemName: '',
+    hsn: '',
+    quantity: '',
+    unit: '',
+    price: '₹ 0.0',
+    discount: '0',
+    discount_type: '',
+    gst: '0',
+    cess: '0',
+    taxableAmt: '₹ 0',
+    amount: '₹ 0',
+  }]);
 
-  const [items, setItems] = useState([]);
+  const [availableItems, setAvailableItems] = useState([]);
 
-  // Fetch items from the server
   useEffect(() => {
-    fetch('http://localhost/php-backend/get_items.php') // Update this URL to your actual endpoint
+    fetch('http://localhost/php-backend/get_items.php')
       .then((response) => response.json())
       .then((data) => {
-        if (data.success) setItems(data.items);
+        if (data.success) setAvailableItems(data.items);
       })
       .catch((error) => console.error('Error fetching items:', error));
   }, []);
@@ -54,9 +51,8 @@ export default function ItemEntry({ setTotalAmount }) {
     setRows(newRows);
   };
 
-  // Use debounce to limit how often `onItemInputChange` runs
   const onItemInputChange = debounce((index, value) => {
-    const selectedItem = items.find((item) => item.name.toLowerCase() === value.toLowerCase());
+    const selectedItem = availableItems.find((item) => item.name.toLowerCase() === value.toLowerCase());
     const newRows = [...rows];
     if (selectedItem) {
       newRows[index] = {
@@ -74,7 +70,7 @@ export default function ItemEntry({ setTotalAmount }) {
       newRows[index].itemName = value;
     }
     setRows(newRows);
-  }, 300); // Adjust debounce timing as needed
+  }, 300);
 
   const handleInputChange = (index, field, value) => {
     const newRows = [...rows];
@@ -89,7 +85,9 @@ export default function ItemEntry({ setTotalAmount }) {
 
     return price + gstAmount + cessAmount - discountAmount;
   };
+
   useEffect(() => {
+    setItems(rows);
     const total = rows.reduce((acc, row) => {
       const price = parseFloat(row.price.replace(/[₹,\s]/g, '')) || 0;
       const gst = parseFloat(row.gst.replace(/[%\s]/g, '')) || 0;
@@ -98,9 +96,8 @@ export default function ItemEntry({ setTotalAmount }) {
 
       return acc + calculateTotalAmount(price, gst, cess, discount);
     }, 0);
-    setTotalAmount(total); // Update the total amount in the parent
-  }, [rows, setTotalAmount]);
-
+    setTotalAmount(total);
+  }, [rows, setTotalAmount, setItems]);
 
   return (
     <div className="p-4 bg-white rounded-md shadow-md">
@@ -123,19 +120,16 @@ export default function ItemEntry({ setTotalAmount }) {
             <th className="p-2 border border-gray-300 font-medium">ACTIONS</th>
           </tr>
         </thead>
-       
+        <tbody>
+          {rows.map((row, index) => {
+            const price = parseFloat(row.price.replace(/[₹,\s]/g, '')) || 0;
+            const gst = parseFloat(row.gst.replace(/[%\s]/g, '')) || 0;
+            const cess = parseFloat(row.cess.replace(/[%\s]/g, '')) || 0;
+            const discount = parseFloat(row.discount) || 0;
 
-          
-              <tbody>
-              {rows.map((row, index) => {
-                const price = parseFloat(row.price.replace(/[₹,\s]/g, '')) || 0;
-                const gst = parseFloat(row.gst.replace(/[%\s]/g, '')) || 0;
-                const cess = parseFloat(row.cess.replace(/[%\s]/g, '')) || 0;
-                const discount = parseFloat(row.discount) || 0;
-    
-                const totalAmount = calculateTotalAmount(price, gst, cess, discount);
-    
-                return (
+            const totalAmount = calculateTotalAmount(price, gst, cess, discount);
+
+            return (
               <tr key={index} className="bg-gray-50 text-gray-700">
                 <td className="p-2 border border-gray-300">{index + 1}</td>
                 <td className="p-2 border border-gray-300">
@@ -148,7 +142,7 @@ export default function ItemEntry({ setTotalAmount }) {
                     onChange={(e) => onItemInputChange(index, e.target.value)}
                   />
                   <datalist id={`item-options-${index}`}>
-                    {items.map((item) => (
+                    {availableItems.map((item) => (
                       <option key={item.id} value={item.name} />
                     ))}
                   </datalist>
@@ -186,25 +180,17 @@ export default function ItemEntry({ setTotalAmount }) {
                     onChange={(e) => handleInputChange(index, 'price', e.target.value)}
                   />
                 </td>
-                <td className="p-2 border-b border-gray-300  ">
-                {/* <input
+                <td className="p-2 border-b border-gray-300">
+                  <input
                     type="text"
                     className="w-full bg-transparent outline-none"
-                    value={row.discount_type}
-                    onChange={(e) => handleInputChange(index, 'discount_type', e.target.value)}
-                  /> */}
-                  
-                  <input
-  type="text"
-  className="w-full bg-transparent outline-none"
-  value={`${row.discount_type} ${row.discount}`} // Concatenating the discount type and value
-  onChange={(e) => {
-    const [discountType, discountValue] = e.target.value.split('. ');
-    handleInputChange(index, 'discount_type', discountType.trim()); // Update discount type
-    handleInputChange(index, 'discount', discountValue ? discountValue.trim() : ''); // Update discount value
-  }}
-/>
-
+                    value={`${row.discount_type} ${row.discount}`}
+                    onChange={(e) => {
+                      const [discountType, discountValue] = e.target.value.split(' ');
+                      handleInputChange(index, 'discount_type', discountType.trim());
+                      handleInputChange(index, 'discount', discountValue ? discountValue.trim() : '');
+                    }}
+                  />
                 </td>
                 <td className="p-2 border border-gray-300">
                   <input
