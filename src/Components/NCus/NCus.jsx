@@ -5,17 +5,56 @@ import { useRouter } from "next/navigation";
 const NewCustomer = () => {
   const router = useRouter();
   const [showBusinessDetails, setShowBusinessDetails] = useState(false);
+  const [showAddressDetails, setShowAddressDetails] = useState(false);
+  const [showShippingAddressDetails, setshowShippingAddressDetails] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [gstin, setGstin] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
 
   const toggleBusinessDetails = () =>
     setShowBusinessDetails(!showBusinessDetails);
 
+  const toggleAddressDetails = () =>
+    setShowAddressDetails(!showAddressDetails);
+
+  const toggleShippingAddressDetails = () =>
+    setshowShippingAddressDetails(!showShippingAddressDetails);
+
+  
+
+  // Fetch pincode details from API
+  const fetchPincodeDetails = async (pin) => {
+    try {
+      const response = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const data = await response.json();
+      if (data[0].Status === "Success") {
+        const { District, State } = data[0].PostOffice[0];
+        setCity(District);
+        setState(State);
+      } else {
+        alert("Invalid PIN code");
+      }
+    } catch (error) {
+      console.error("Error fetching pincode details:", error);
+    }
+  };
+
+  // Handle PIN code input
+  const handlePincodeChange = (e) => {
+    const pin = e.target.value;
+    setPincode(pin);
+    if (pin.length === 6) {
+      fetchPincodeDetails(pin);
+    }
+  };
+
   const handleSave = async (event) => {
-    event.preventDefault(); // Prevent form default submission
+    event.preventDefault();
 
     try {
       const response = await fetch(
@@ -30,18 +69,21 @@ const NewCustomer = () => {
             phone,
             email,
             gstin,
+            pincode,
+            city,
+            state,
           }),
         }
       );
 
       const data = await response.json();
-      console.log(data); // For debugging
+      console.log(data);
 
       if (data.success) {
         alert(data.message);
-        router.push("/"); // Redirect to home page on success
+        router.push("/");
       } else {
-        alert(data.message); // Show error message
+        alert(data.message);
       }
     } catch (error) {
       console.error("Error saving customer:", error);
@@ -102,6 +144,102 @@ const NewCustomer = () => {
           </div>
         )}
 
+        <div
+          className="cursor-pointer text-blue-600 mb-4"
+          onClick={toggleAddressDetails}
+        >
+          {showAddressDetails
+            ? "▾ Billing Address"
+            : "▸ Billing Address"}
+        </div>
+
+        {showAddressDetails && (
+          <div>
+            <div>
+            <input
+              type="Address"
+              placeholder="Address *"
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              
+            />
+
+            </div>
+          <div className="mb-6 flex gap-5">
+            <input
+              type="number"
+              placeholder="Pincode *"
+              value={pincode}
+              onChange={handlePincodeChange}
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={city}
+              readOnly
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+            <input
+              type="text"
+              placeholder="State"
+              value={state}
+              readOnly
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+          </div>
+          </div>
+        )}
+
+
+
+<div
+          className="cursor-pointer text-blue-600 mb-4"
+          onClick={toggleShippingAddressDetails}
+        >
+          {showShippingAddressDetails
+            ? "▾ Shipping Address "
+            : "▸ Shipping Address "}
+        </div>
+
+        {showShippingAddressDetails && (
+          <div>
+            <div>
+            <input
+              type="Address"
+              placeholder="Address *"
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              
+            />
+
+            </div>
+          <div className="mb-6 flex gap-5">
+            <input
+              type="number"
+              placeholder="Pincode *"
+              value={pincode}
+              onChange={handlePincodeChange}
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={city}
+              readOnly
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+            <input
+              type="text"
+              placeholder="State"
+              value={state}
+              readOnly
+              className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            />
+          </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mt-6">
           <button
             type="button"
@@ -120,6 +258,9 @@ const NewCustomer = () => {
                 setPhone("");
                 setEmail("");
                 setGstin("");
+                setPincode("");
+                setCity("");
+                setState("");
               }}
             >
               Cancel
