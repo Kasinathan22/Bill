@@ -6,22 +6,31 @@ import { useRouter } from "next/navigation";
 export default function NewCustomer() {
   const router = useRouter();
   const [showBusinessDetails, setShowBusinessDetails] = useState(false);
-  const [showAddressDetails, setShowAddressDetails] = useState(false);
-  const [showShippingAddressDetails, setShowShippingAddressDetails] = useState(false);
+  const [showBillingAddress, setShowBillingAddress] = useState(false);
+  const [showShippingAddress, setShowShippingAddress] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [gstin, setGstin] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
   const [gstDetails, setGstDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Billing Address States
+  const [billingAddress, setBillingAddress] = useState("");
+  const [billingPincode, setBillingPincode] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingState, setBillingState] = useState("");
+
+  // Shipping Address States
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingPincode, setShippingPincode] = useState("");
+  const [shippingCity, setShippingCity] = useState("");
+  const [shippingState, setShippingState] = useState("");
+
   const toggleBusinessDetails = () => setShowBusinessDetails(!showBusinessDetails);
-  const toggleAddressDetails = () => setShowAddressDetails(!showAddressDetails);
-  const toggleShippingAddressDetails = () => setShowShippingAddressDetails(!showShippingAddressDetails);
+  const toggleBillingAddress = () => setShowBillingAddress(!showBillingAddress);
+  const toggleShippingAddress = () => setShowShippingAddress(!showShippingAddress);
 
   const fetchGSTDetails = async (gstNumber) => {
     try {
@@ -44,6 +53,26 @@ export default function NewCustomer() {
       if (data && data.data) {
         setGstDetails(data.data);
         console.log("Updated GST details state:", data.data);
+
+        // Set billing address fields with full address
+        const address = data.data.principalAddress?.address;
+        const fullAddress = [
+          address?.buildingNumber,
+          address?.buildingName,
+          address?.floorNumber,
+          address?.street,
+          address?.location,
+          address?.district,
+          address?.city,
+          address?.state,
+          address?.stateCode,
+          address?.pincode
+        ].filter(Boolean).join(', ');
+
+        setBillingAddress(fullAddress);
+        setBillingPincode(address?.pincode || '');
+        setBillingCity(address?.city || '');
+        setBillingState(address?.state || '');
       } else {
         console.error("Unexpected API response format:", data);
         alert("Received an unexpected response format from the GST API.");
@@ -51,6 +80,8 @@ export default function NewCustomer() {
     } catch (error) {
       console.error("Error fetching GST details:", error);
       alert("An error occurred while fetching GST details. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,13 +90,18 @@ export default function NewCustomer() {
     setGstin(gstNumber);
     if (gstNumber.length === 15) {
       setIsLoading(true);
-      fetchGSTDetails(gstNumber).finally(() => setIsLoading(false));
+      fetchGSTDetails(gstNumber);
     } else {
       setGstDetails(null);
+      // Clear billing address fields when GSTIN is changed
+      setBillingAddress('');
+      setBillingPincode('');
+      setBillingCity('');
+      setBillingState('');
     }
   };
 
-  const fetchPincodeDetails = async (pin) => {
+  const fetchPincodeDetails = async (pin, setCity, setState) => {
     try {
       const response = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
       const data = await response.json();
@@ -81,17 +117,38 @@ export default function NewCustomer() {
     }
   };
 
-  const handlePincodeChange = (e) => {
+  const handleBillingPincodeChange = (e) => {
     const pin = e.target.value;
-    setPincode(pin);
+    setBillingPincode(pin);
     if (pin.length === 6) {
-      fetchPincodeDetails(pin);
+      fetchPincodeDetails(pin, setBillingCity, setBillingState);
+    }
+  };
+
+  const handleShippingPincodeChange = (e) => {
+    const pin = e.target.value;
+    setShippingPincode(pin);
+    if (pin.length === 6) {
+      fetchPincodeDetails(pin, setShippingCity, setShippingState);
     }
   };
 
   const handleSave = async (event) => {
     event.preventDefault();
-
+    console.log("Sending data:", {
+      name,
+      phone,
+      email,
+      gstin,
+      billingAddress,
+      billingPincode,
+      billingCity,
+      billingState,
+      shippingAddress,
+      shippingPincode,
+      shippingCity,
+      shippingState,
+    });
     try {
       const response = await fetch(
         "http://localhost/php-backend/save_customer.php",
@@ -105,9 +162,14 @@ export default function NewCustomer() {
             phone,
             email,
             gstin,
-            pincode,
-            city,
-            state,
+            billingAddress,
+            billingPincode,
+            billingCity,
+            billingState,
+            shippingAddress,
+            shippingPincode,
+            shippingCity,
+            shippingState,
           }),
         }
       );
@@ -163,51 +225,30 @@ export default function NewCustomer() {
           className="cursor-pointer text-blue-600 mb-4"
           onClick={toggleBusinessDetails}
         >
-          {showBusinessDetails
-            ? "▾ Business, GSTIN Details"
-            : "▸ Business, GSTIN Details"}
+          {showBusinessDetails ? "▾ Business, GSTIN Details" : "▸ Business, GSTIN Details"}
         </div>
         {showBusinessDetails && (
-  <div className="mb-6 ">
-    <div className="flex gap-5">
-    <input
-      type="text"
-      placeholder="Enter 15-digit GSTIN number"
-      value={gstin}
-      onChange={handleGstinChange}
-      className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-    />
-    <input
-      type="text"
-      placeholder="Legal Name"
-      value={gstDetails?.legalName}
-      readOnly
-      className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full "
-    />
-</div>
-
-
-           
+          <div className="mb-6">
+            <div className="flex gap-5">
+              <input
+                type="text"
+                placeholder="Enter 15-digit GSTIN number"
+                value={gstin}
+                onChange={handleGstinChange}
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Legal Name"
+                value={gstDetails?.legalName}
+                readOnly
+                className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              />
+            </div>
             {isLoading && <p className="mt-2 text-sm text-blue-600">Loading GST details...</p>}
             {!isLoading && gstDetails && (
-             
               <div className="mt-2 text-sm text-gray-600">
-
-
-
-                {/* <p>Legal Name: {gstDetails.legalName || 'N/A'}</p> */}
-                {/* <p>
-  Building Address: {`${gstDetails.principalAddress?.address?.buildingNumber || ''}, 
-  ${gstDetails.principalAddress?.address?.buildingName || ''}, 
-  ${gstDetails.principalAddress?.address?.street || ''}, 
-  ${gstDetails.principalAddress?.address?.location || ''}, 
-  ${gstDetails.principalAddress?.address?.district || ''}, 
-  ${gstDetails.principalAddress?.address?.stateCode || ''}, 
-  ${gstDetails.principalAddress?.address?.pincode || ''}` || 'N/A'}
-</p> */}
-
-                {/* <p>Status: {gstDetails.status || 'N/A'}</p>
-                <p>Last Updated: {new Date().toLocaleString()}</p> */}
+                {/* GST details display */}
               </div>
             )}
           </div>
@@ -215,76 +256,63 @@ export default function NewCustomer() {
 
         <div
           className="cursor-pointer text-blue-600 mb-4"
-          onClick={toggleAddressDetails}
+          onClick={toggleBillingAddress}
         >
-          {showAddressDetails
-            ? "▾ Billing Address"
-            : "▸ Billing Address"}
+          {showBillingAddress ? "▾ Billing Address" : "▸ Billing Address"}
         </div>
-
-        {showAddressDetails &&  gstDetails && (
-         
-          <div class="py-2 max-w-md mx-auto">
-          <div class="border border-gray-300  rounded-lg p-4 ">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="text-md font-medium">Address</h3>
+        {showBillingAddress && gstDetails && (
+          <div className="py-2 max-w-md mx-auto">
+            <div className="border border-gray-300 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-md font-medium">Billing Address</h3>
+              </div>
+              <p className="text-gray-700">
+                {billingAddress}
+              </p>
+              <p className="text-gray-700 mt-1 font-semibold">
+                PIN: {billingPincode || 'N/A'}
+              </p>
             </div>
-            <p class="text-gray-700">
-              {`${gstDetails.principalAddress?.address?.buildingNumber || ''}
-              ${gstDetails.principalAddress?.address?.floorNumber || ''}
-              ${gstDetails.principalAddress?.address?.buildingName || ''} 
-              ${gstDetails.principalAddress?.address?.street || ''}
-              ${gstDetails.principalAddress?.address?.location || ''}
-              ${gstDetails.principalAddress?.address?.district || ''}
-              ${gstDetails.principalAddress?.address?.stateCode || ''}`}
-            </p>
-            <p class="text-gray-700 mt-1 font-semibold">
-              PIN: {gstDetails.principalAddress?.address?.pincode || 'N/A'}
-            </p>
           </div>
-        </div>
-        
         )}
+
 
         <div
           className="cursor-pointer text-blue-600 mb-4"
-          onClick={toggleShippingAddressDetails}
+          onClick={toggleShippingAddress}
         >
-          {showShippingAddressDetails
-            ? "▾ Shipping Address "
-            : "▸ Shipping Address "}
+          {showShippingAddress ? "▾ Shipping Address" : "▸ Shipping Address"}
         </div>
-
-        {showShippingAddressDetails && (
-          <div>
-            <div>
+        {showShippingAddress && (
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Shipping Address"
+              value={shippingAddress}
+              onChange={(e) => setShippingAddress(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 mb-2 w-full"
+            />
+            <div className="flex gap-4">
               <input
                 type="text"
-                placeholder="Address *"
-                className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-              />
-            </div>
-            <div className="mb-6 flex gap-5">
-              <input
-                type="number"
-                placeholder="Pincode *"
-                value={pincode}
-                onChange={handlePincodeChange}
-                className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                placeholder="Pincode"
+                value={shippingPincode}
+                onChange={handleShippingPincodeChange}
+                className="border border-gray-300 rounded-lg p-2 w-1/3"
               />
               <input
                 type="text"
                 placeholder="City"
-                value={city}
+                value={shippingCity}
                 readOnly
-                className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="border border-gray-300 rounded-lg p-2 w-1/3"
               />
               <input
                 type="text"
                 placeholder="State"
-                value={state}
+                value={shippingState}
                 readOnly
-                className="border border-gray-300 rounded-lg p-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="border border-gray-300 rounded-lg p-2 w-1/3"
               />
             </div>
           </div>
@@ -308,9 +336,14 @@ export default function NewCustomer() {
                 setPhone("");
                 setEmail("");
                 setGstin("");
-                setPincode("");
-                setCity("");
-                setState("");
+                setBillingAddress("");
+                setBillingPincode("");
+                setBillingCity("");
+                setBillingState("");
+                setShippingAddress("");
+                setShippingPincode("");
+                setShippingCity("");
+                setShippingState("");
                 setGstDetails(null);
               }}
             >
