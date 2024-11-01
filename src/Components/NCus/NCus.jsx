@@ -61,13 +61,13 @@ export default function NewCustomer() {
           address?.buildingName,
           address?.floorNumber,
           address?.street,
-          address?.location,
+          // address?.location,
           address?.district,
           address?.city,
           address?.state,
           address?.stateCode,
           address?.pincode
-        ].filter(Boolean).join(', ');
+        ].filter(Boolean).join(' ');
 
         setBillingAddress(fullAddress);
         setBillingPincode(address?.pincode || '');
@@ -269,9 +269,9 @@ export default function NewCustomer() {
               <p className="text-gray-700">
                 {billingAddress}
               </p>
-              <p className="text-gray-700 mt-1 font-semibold">
+              {/* <p className="text-gray-700 mt-1 font-semibold">
                 PIN: {billingPincode || 'N/A'}
-              </p>
+              </p> */}
             </div>
           </div>
         )}

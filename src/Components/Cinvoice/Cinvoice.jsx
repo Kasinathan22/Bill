@@ -117,6 +117,9 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
               <p><strong>Phone:</strong> {selectedCustomer.phone}</p>
               <p><strong>Email:</strong> {selectedCustomer.email}</p>
               <p><strong>GSTIN:</strong> {selectedCustomer.gstin}</p>
+              <p><strong>Billing Address:</strong> {selectedCustomer.billing_address}</p>
+              <p><strong>Shipping Address:</strong> {selectedCustomer.shipping_address},{selectedCustomer.shipping_city},{selectedCustomer.shipping_state},{selectedCustomer.shipping_pincode}</p>
+              
               <button
                 className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                 onClick={clearSelectedCustomer}

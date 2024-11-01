@@ -19,7 +19,7 @@ $searchTerm = isset($_GET['name']) ? $_GET['name'] : '';
 
 if (!empty($searchTerm)) {
     // Update the query to include email and gstin
-    $stmt = $conn->prepare("SELECT id, name, phone, email, gstin FROM customers WHERE name LIKE ? LIMIT 10");
+    $stmt = $conn->prepare("SELECT id, name, phone, email, gstin, billing_address, shipping_address,  shipping_pincode,  shipping_city, shipping_state FROM customers WHERE name LIKE ? LIMIT 10");
     $likeTerm = "%" . $searchTerm . "%";
     $stmt->bind_param("s", $likeTerm);
     $stmt->execute();
