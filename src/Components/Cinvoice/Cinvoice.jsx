@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import SettingsPopup from '../Cinvoice/SettingsPopup'
 
 const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,7 +15,12 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
   const [isInvoiceSaved, setIsInvoiceSaved] = useState(false);
   const router = useRouter();
 
-  const togglePopup = () => setShowPopup(!showPopup);
+ 
+ 
+
+  const togglePopup = () => {
+    setIsPopupOpen(!isPopupOpen);
+  };
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -135,7 +142,7 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
           <div className="space-y-4">
             <div className="flex justify-between">
               <span className="text-gray-700">Invoice No.</span>
-              <span className="text-blue-600">KASHGARINV54</span>
+              <span className="text-blue-600">KASHGARINV</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-700">Date</span>
@@ -155,6 +162,11 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
             >
               <span className="text-lg mr-1">+</span> Add/Edit Field
             </button>
+          
+      <SettingsPopup 
+        isOpen={isPopupOpen} 
+        onClose={togglePopup} 
+      />
           </div>
         </div>
       </div>
