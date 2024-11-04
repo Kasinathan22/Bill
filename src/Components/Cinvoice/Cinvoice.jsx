@@ -3,20 +3,19 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import SettingsPopup from '../Cinvoice/SettingsPopup'
+import SettingsPopup from '../Cinvoice/SettingsPopup';
 
 const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
-  const [showPopup, setShowPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isInvoiceSaved, setIsInvoiceSaved] = useState(false);
+  const [invoiceName, setInvoiceName] = useState("KASHGARINV"); // Default invoice name
+  const [invoiceNo, setInvoiceNo] = useState(""); // State for invoice number
+  const [selectedFields, setSelectedFields] = useState([]); // State to hold selected fields
   const router = useRouter();
-
- 
- 
 
   const togglePopup = () => {
     setIsPopupOpen(!isPopupOpen);
@@ -68,6 +67,14 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
     }
   };
 
+  const handleFieldSelection = (field, isSelected) => {
+    if (isSelected) {
+      setSelectedFields(prev => prev.filter(f => f !== field));
+    } else {
+      setSelectedFields(prev => [...prev, field]);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-8 mb-8">
       <header className="flex justify-between items-center mb-8">
@@ -98,7 +105,6 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
           <input
             type="text"
             placeholder="Search by Customer Name"
-            
             className="w-full border px-4 py-2 rounded-md shadow-sm mb-4"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -125,8 +131,7 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
               <p><strong>Email:</strong> {selectedCustomer.email}</p>
               <p><strong>GSTIN:</strong> {selectedCustomer.gstin}</p>
               <p><strong>Billing Address:</strong> {selectedCustomer.billing_address}</p>
-              <p><strong>Shipping Address:</strong> {selectedCustomer.shipping_address},{selectedCustomer.shipping_city},{selectedCustomer.shipping_state},{selectedCustomer.shipping_pincode}</p>
-              
+              <p><strong>Shipping Address:</strong> {selectedCustomer.shipping_address}, {selectedCustomer.shipping_city}, {selectedCustomer.shipping_state}, {selectedCustomer.shipping_pincode}</p>
               <button
                 className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                 onClick={clearSelectedCustomer}
@@ -141,35 +146,120 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
           <h2 className="text-lg font-medium mb-4">Invoice Details</h2>
           <div className="space-y-4">
             <div className="flex justify-between">
-              <span className="text-gray-700">Invoice No.</span>
-              <span className="text-blue-600">KASHGARINV</span>
+              <span className="text-gray-700">Invoice Name</span>
+              <input
+                type="text"
+                placeholder=""
+                className="border px-2 py-1 rounded-md border-black"
+                value={invoiceName}
+                onChange={(e) => setInvoiceName(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Invoice No</span>
+              <input
+                type="text"
+                placeholder=""
+                className="border px-2 py-1 rounded-md border-black"
+                value={invoiceNo}
+                onChange={(e) => setInvoiceNo(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Full Invoice Identifier</span>
+              <span className="text-blue-600">{`${invoiceName}${invoiceNo}`}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-700">Date</span>
               <span className="text-blue-600">{currentDate}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Vehicle Number</span>
-              <input
-                type="text"
-                placeholder="eg. GA-02-5744"
-                className="border px-2 py-1 rounded-md"
-              />
-            </div>
+
+            {selectedFields.includes("Vehicle Number") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">Vehicle Number</span>
+                <input
+                  type="text"
+                  placeholder="eg. GA-02-5744"
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("Dispatch Number") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">Dispatch Number</span>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("PO Date") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">PO Date</span>
+                <input
+                  type="date"
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("Supply Type") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">Supply Type</span>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("Sales Person") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">Sales Person</span>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("Transporter") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">Transporter</span>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+            {selectedFields.includes("PO Number") && (
+              <div className="flex justify-between">
+                <span className="text-gray-700">PO Number</span>
+                <input
+                  type="text"
+                  placeholder=""
+                  className="border px-2 py-1 rounded-md"
+                />
+              </div>
+            )}
+
             <button
               onClick={togglePopup}
               className="text-blue-500 flex items-center mt-4"
             >
               <span className="text-lg mr-1">+</span> Add/Edit Field
             </button>
-          
-      <SettingsPopup 
-        isOpen={isPopupOpen} 
-        onClose={togglePopup} 
-      />
           </div>
         </div>
       </div>
+      
+      <SettingsPopup 
+        isOpen={isPopupOpen} 
+        onClose={togglePopup} 
+        selectedFields={selectedFields}
+        onFieldChange={handleFieldSelection}
+      />
     </div>
   );
 };
