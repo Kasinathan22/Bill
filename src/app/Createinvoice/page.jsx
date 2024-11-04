@@ -10,12 +10,14 @@ const Createinvoice = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [items, setItems] = useState([]);
   const [customerDetails, setCustomerDetails] = useState(null);
+  const [invoiceDetails, setInvoiceDetails] = useState({});
   const router = useRouter();
 
   const handleSaveInvoice = () => {
     if (customerDetails) {
       const query = new URLSearchParams({
         ...customerDetails,
+        ...invoiceDetails, // Include additional invoice details
         items: JSON.stringify(items),
         totalAmount: totalAmount.toString()
       }).toString();
@@ -26,11 +28,13 @@ const Createinvoice = () => {
     }
   };
 
+
   return (
     <div className="bg-gray-100 min-h-screen p-8">
       <Cinvoice 
-        onSaveInvoice={handleSaveInvoice}
-        onCustomerSelect={setCustomerDetails}
+         onSaveInvoice={handleSaveInvoice}
+         onCustomerSelect={setCustomerDetails}
+         onInvoiceDetailsChange={setInvoiceDetails}
       />
     
       <ItemEntry 

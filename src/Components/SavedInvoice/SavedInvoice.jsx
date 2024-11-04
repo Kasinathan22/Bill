@@ -10,6 +10,9 @@ const SavedInvoice = () => {
     const phone = searchParams.get('phone');
     const email = searchParams.get('email');
     const gstin = searchParams.get('gstin');
+    const invoiceNo = searchParams.get('invoiceNo') || 'KASHGARINV24128';
+    const invoiceName = searchParams.get('invoiceName') || 'KASHGARINV24128';
+
     const items = JSON.parse(searchParams.get('items') || '[]');
     const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
 
@@ -39,6 +42,7 @@ const SavedInvoice = () => {
                 <h1 className="text-3xl font-bold">Kashgar Internet Private Limited</h1>
                 <p>F801, F Block, 8th Floor, Charms Castle, Ghaziabad, UP 201017 | State Code: 09</p>
                 <p>GSTIN: 09AAJCK9877F1ZS</p>
+                <p></p>
             </div>
 
             {/* Invoice Details */}
@@ -48,6 +52,9 @@ const SavedInvoice = () => {
                         <h2 className="text-xl font-semibold">Tax Invoice</h2>
                         <p>Invoice No: <strong>KASHGARINV24128</strong></p>
                         <p>Date: 28-10-2024</p>
+                        <p>Invoice No: <strong>{invoiceName}{invoiceNo}</strong></p>
+                      
+
                     </div>
                     <div>
                         <h3 className="text-lg font-semibold">Bill To:</h3>

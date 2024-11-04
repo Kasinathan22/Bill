@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import SettingsPopup from '../Cinvoice/SettingsPopup';
 
-const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
+const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState('');
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +39,14 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
     };
     fetchCustomers();
   }, [searchQuery]);
+
+  useEffect(() => {
+    onInvoiceDetailsChange({
+      invoiceName,
+      invoiceNo,
+      currentDate,
+    });
+  }, [invoiceName, invoiceNo, currentDate]);
 
   useEffect(() => {
     const today = new Date();
@@ -145,26 +153,20 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
         <div className="bg-gray-50 p-6 rounded-md">
           <h2 className="text-lg font-medium mb-4">Invoice Details</h2>
           <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-700">Invoice Name</span>
-              <input
-                type="text"
-                placeholder=""
-                className="border px-2 py-1 rounded-md border-black"
-                value={invoiceName}
-                onChange={(e) => setInvoiceName(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Invoice No</span>
-              <input
-                type="text"
-                placeholder=""
-                className="border px-2 py-1 rounded-md border-black"
-                value={invoiceNo}
-                onChange={(e) => setInvoiceNo(e.target.value)}
-              />
-            </div>
+          <div className="flex justify-between">
+          <span className="text-gray-700">Invoice No</span>
+          <input
+            type="text"
+            className="border px-2 py-1 rounded-md border-black"
+            value={invoiceNo}
+            onChange={(e) => setInvoiceNo(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-700">Date</span>
+          <span className="text-blue-600">{currentDate}</span>
+        </div>
+           
             <div className="flex justify-between">
               <span className="text-gray-700">Full Invoice Identifier</span>
               <span className="text-blue-600">{`${invoiceName}${invoiceNo}`}</span>
@@ -181,6 +183,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect }) => {
                   type="text"
                   placeholder="eg. GA-02-5744"
                   className="border px-2 py-1 rounded-md"
+                  value={vechicleNo}
+                  onChange={(e) => setvechicleNo(e.target.value)}
                 />
               </div>
             )}
