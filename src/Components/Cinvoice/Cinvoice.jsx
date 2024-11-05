@@ -58,12 +58,12 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
       invoiceNo,
       currentDate,
       ...(vechicleNo && { vehicleNumberHeading: "Vehicle Number :", vechicleNo }),
-    ...(DispatchNo && { DispatchNoHeading: "Dispatch Number", DispatchNo }),
-    ...(PODate && { PODateHeading: "PO Date", PODate }),
-    ...(SupplyType && { SupplyTypeHeading: "Supply Type", SupplyType }),
-    ...(Saleperson && { SalepersonHeading: "Sales Person", Saleperson }),
-    ...(Transporter && { TransporterHeading: "Transporter", Transporter }),
-    ...(PON && { PONHeading: "PO Number", PON }),
+      ...(DispatchNo && { DispatchNoHeading: "Dispatch Number", DispatchNo }),
+      ...(PODate && { PODateHeading: "PO Date", PODate }),
+      ...(SupplyType && { SupplyTypeHeading: "Supply Type", SupplyType }),
+      ...(Saleperson && { SalepersonHeading: "Sales Person", Saleperson }),
+      ...(Transporter && { TransporterHeading: "Transporter", Transporter }),
+      ...(PON && { PONHeading: "PO Number", PON }),
     });
   }, [invoiceName, invoiceNo, currentDate, vechicleNo, DispatchNo, PODate, SupplyType, Saleperson, Transporter, PON]);
   

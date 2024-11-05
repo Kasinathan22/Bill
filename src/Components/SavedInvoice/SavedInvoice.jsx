@@ -21,6 +21,20 @@ const SavedInvoice = () => {
     const invoiceName = searchParams.get('invoiceName') || 'KASHGARINV24128';
     const vechicleNo = searchParams.get('vechicleNo');
     const vehicleNumberHeading = searchParams.get('vehicleNumberHeading');
+    const DispatchNo = searchParams.get('DispatchNo');
+    const DispatchNoHeading = searchParams.get('DispatchNoHeading');
+    const PODate = searchParams.get('PODate');
+    const PODateHeading = searchParams.get('PODateHeading');
+    const SupplyType = searchParams.get('SupplyType');
+    const SupplyTypeHeading = searchParams.get('SupplyTypeHeading');
+    const Saleperson = searchParams.get('Saleperson');
+    const SalepersonHeading = searchParams.get('SalepersonHeading');
+    const Transporter = searchParams.get('Transporter');
+    const TransporterHeading = searchParams.get('TransporterHeading');
+    const PON = searchParams.get('PON');
+    const PONHeading = searchParams.get('PONHeading');
+
+
 
     const items = JSON.parse(searchParams.get('items') || '[]');
     const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
@@ -77,7 +91,13 @@ const SavedInvoice = () => {
                     <div>
                         <p>{shipping_address}{shipping_city}{shipping_state}{shipping_pincode}</p>
                     <p><strong>{vehicleNumberHeading}</strong> {vechicleNo}</p>
-                    </div>
+                    <p><strong>{DispatchNoHeading}</strong> {DispatchNo}</p>
+                    <p><strong>{PODateHeading}</strong> {PODate}</p>
+                    <p><strong>{SupplyTypeHeading}</strong> {SupplyType}</p>
+                    <p><strong>{SalepersonHeading}</strong> {Saleperson}</p>
+                    <p><strong>{TransporterHeading}</strong> {Transporter}</p>
+                    <p><strong>{PONHeading}</strong> {PON}</p>
+                            </div>
 
                 </div>
 
