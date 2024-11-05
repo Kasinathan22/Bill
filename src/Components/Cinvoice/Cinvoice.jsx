@@ -14,7 +14,19 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
   const [isInvoiceSaved, setIsInvoiceSaved] = useState(false);
   const [invoiceName, setInvoiceName] = useState("KASHGARINV"); // Default invoice name
   const [invoiceNo, setInvoiceNo] = useState(""); // State for invoice number
-  const [selectedFields, setSelectedFields] = useState([]); // State to hold selected fields
+ 
+
+  const [vechicleNo, setVechicleNo] = useState(""); // State for vehicle number
+  
+  const [selectedFields, setSelectedFields] = useState(["Vehicle Number"]);
+
+  const [DispatchNo, setDispatchNo]=useState("");
+  const [PODate, setPODate]=useState("");
+  const [SupplyType, setSupplyType]=useState("");
+  const [Saleperson, setSaleperson]=useState("");
+  const [Transporter, setTransporter]=useState("");
+  const [PON, setPON]=useState("");
+   
   const router = useRouter();
 
   const togglePopup = () => {
@@ -45,9 +57,16 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
       invoiceName,
       invoiceNo,
       currentDate,
+      ...(vechicleNo && { vehicleNumberHeading: "Vehicle Number :", vechicleNo }),
+    ...(DispatchNo && { DispatchNoHeading: "Dispatch Number", DispatchNo }),
+    ...(PODate && { PODateHeading: "PO Date", PODate }),
+    ...(SupplyType && { SupplyTypeHeading: "Supply Type", SupplyType }),
+    ...(Saleperson && { SalepersonHeading: "Sales Person", Saleperson }),
+    ...(Transporter && { TransporterHeading: "Transporter", Transporter }),
+    ...(PON && { PONHeading: "PO Number", PON }),
     });
-  }, [invoiceName, invoiceNo, currentDate]);
-
+  }, [invoiceName, invoiceNo, currentDate, vechicleNo, DispatchNo, PODate, SupplyType, Saleperson, Transporter, PON]);
+  
   useEffect(() => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-GB');
@@ -184,7 +203,7 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   placeholder="eg. GA-02-5744"
                   className="border px-2 py-1 rounded-md"
                   value={vechicleNo}
-                  onChange={(e) => setvechicleNo(e.target.value)}
+                  onChange={(e) => setVechicleNo(e.target.value)}
                 />
               </div>
             )}
@@ -195,6 +214,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   type="text"
                   placeholder=""
                   className="border px-2 py-1 rounded-md"
+                  value={DispatchNo}
+                  onChange={(e) => setDispatchNo(e.target.value)}
                 />
               </div>
             )}
@@ -204,6 +225,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                 <input
                   type="date"
                   className="border px-2 py-1 rounded-md"
+                  value={PODate}
+                  onChange={(e) => setPODate(e.target.value)}
                 />
               </div>
             )}
@@ -214,6 +237,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   type="text"
                   placeholder=""
                   className="border px-2 py-1 rounded-md"
+                  value={SupplyType}
+                  onChange={(e) => setSupplyType(e.target.value)}
                 />
               </div>
             )}
@@ -224,6 +249,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   type="text"
                   placeholder=""
                   className="border px-2 py-1 rounded-md"
+                  value={Saleperson}
+                  onChange={(e) => setSaleperson(e.target.value)}
                 />
               </div>
             )}
@@ -234,6 +261,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   type="text"
                   placeholder=""
                   className="border px-2 py-1 rounded-md"
+                  value={Transporter}
+                  onChange={(e) => setTransporter(e.target.value)}
                 />
               </div>
             )}
@@ -244,6 +273,8 @@ const Cinvoice = ({ onSaveInvoice, onCustomerSelect, onInvoiceDetailsChange }) =
                   type="text"
                   placeholder=""
                   className="border px-2 py-1 rounded-md"
+                  value={PON}
+                  onChange={(e) => setPON(e.target.value)}
                 />
               </div>
             )}
