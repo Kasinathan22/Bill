@@ -146,13 +146,32 @@ const SavedInvoice = () => {
                 </div>
 
                 {/* Bank Details Section */}
-                <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+                <div className="mt-6  ">
                     <h3 className="text-lg font-semibold">Bank Details</h3>
                     <p><strong>Bank Name:</strong> {bankName}</p>
                     <p><strong>Account Holder:</strong> {accountHolderName}</p>
                     <p><strong>Account Number:</strong> {accountNumber}</p>
                     <p><strong>IFSC:</strong> {ifsc}</p>
                 </div>
+                <div className="grid grid-cols-2 py-5">
+      <div className="mb-4">
+        <h4 className="font-semibold mb-2">Terms & Conditions</h4>
+        <p className="text-sm">
+          GOODS ONCE SOLD WILL NOT BE TAKEN BACK.<br />
+          ALL DISPUTES WILL BE SUBJECT TO GHAZIABAD JURISDICTION.
+        </p>
+      </div>
+      <div className="flex flex-col items-end justify-end">
+        
+        <h1>Authorized Signatory</h1>
+      </div>
+
+      <div className="py-5">
+      <h4 className="font-semibold mb-2">Notes</h4>
+      <p className="text-sm">This is a computer-generated invoice hence no signature required.</p>
+      </div>
+    </div>
+     
             </div>
 
             {/* Actions */}
