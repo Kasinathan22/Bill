@@ -11,13 +11,15 @@ const Createinvoice = () => {
   const [items, setItems] = useState([]);
   const [customerDetails, setCustomerDetails] = useState(null);
   const [invoiceDetails, setInvoiceDetails] = useState({});
+  const [bankDetails, setBankDetails] = useState({});
   const router = useRouter();
 
   const handleSaveInvoice = () => {
     if (customerDetails) {
       const query = new URLSearchParams({
         ...customerDetails,
-        ...invoiceDetails, // Include additional invoice details
+        ...invoiceDetails,
+        ...bankDetails,  // Include bank details in the query
         items: JSON.stringify(items),
         totalAmount: totalAmount.toString()
       }).toString();
@@ -27,7 +29,6 @@ const Createinvoice = () => {
       alert("Please select a customer before saving the invoice.");
     }
   };
-
 
   return (
     <div className="bg-gray-100 min-h-screen p-8">
@@ -45,7 +46,7 @@ const Createinvoice = () => {
    
       <div className="flex gap-4 mt-8">
         <div className="w-2/3 bg-white rounded-lg shadow-md p-6">
-          <BankDetails />
+          <BankDetails onBankDetailsChange={setBankDetails} />
         </div>
 
         <div className="w-1/3 bg-white rounded-lg shadow-md p-6">

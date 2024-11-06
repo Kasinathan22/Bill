@@ -1,11 +1,13 @@
 "use client";
-import { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const SavedInvoice = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [currentDate, setCurrentDate] = useState('');
     
+    // Retrieve general invoice and customer details from searchParams
     const name = searchParams.get('name');
     const phone = searchParams.get('phone');
     const email = searchParams.get('email');
@@ -15,8 +17,7 @@ const SavedInvoice = () => {
     const shipping_city = searchParams.get('shipping_city');
     const shipping_state = searchParams.get('shipping_state');
     const shipping_pincode = searchParams.get('shipping_pincode');
-
-
+    
     const invoiceNo = searchParams.get('invoiceNo') || 'KASHGARINV24128';
     const invoiceName = searchParams.get('invoiceName') || 'KASHGARINV24128';
     const vechicleNo = searchParams.get('vechicleNo');
@@ -33,11 +34,15 @@ const SavedInvoice = () => {
     const TransporterHeading = searchParams.get('TransporterHeading');
     const PON = searchParams.get('PON');
     const PONHeading = searchParams.get('PONHeading');
-
-
-
+    
     const items = JSON.parse(searchParams.get('items') || '[]');
     const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
+    
+    // Retrieve bank details from searchParams
+    const bankName = searchParams.get('bankName');
+    const accountHolderName = searchParams.get('accountHolderName');
+    const accountNumber = searchParams.get('accountNumber');
+    const ifsc = searchParams.get('ifsc');
 
     const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [template, setTemplate] = useState('template1');
@@ -58,53 +63,61 @@ const SavedInvoice = () => {
         window.print();
     };
 
+    useEffect(() => {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-GB');
+        setCurrentDate(formattedDate);
+    }, []);
+
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
             {/* Header */}
             <div className={`${template === 'template1' ? 'bg-blue-900' : template === 'template2' ? 'bg-green-900' : 'bg-yellow-900'} text-white p-6 rounded-t-md`}>
-                <h1 className="text-3xl font-bold">Kashgar Internet Private Limited</h1>
-                <p>F801, F Block, 8th Floor, Charms Castle, Ghaziabad, UP 201017 | State Code: 09</p>
-                <p>GSTIN: 09AAJCK9877F1ZS</p>
-                <p>{vechicleNo}</p>
+                <h1 className="text-5xl font-bold py-5">Kashgar Internet Private <br />Limited</h1>
             </div>
 
             {/* Invoice Details */}
             <div className="p-6 bg-white shadow-md">
-                <div className="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 className="text-xl font-semibold">Tax Invoice</h2>
-                        <p>Invoice No: <strong>KASHGARINV24128</strong></p>
-                        <p>Date: 28-10-2024</p>
-                        <p>Invoice No: <strong>{invoiceName}{invoiceNo}</strong></p>
-                        <p></p>
-                      
-
+                <div className="grid grid-cols-2 py-5 justify-between items-start">
+                    <div className="w-full">
+                        <p>801, F Block, 8th Floor, Charms Castle, Raj Nagar Extension Road, Ghaziabad, Uttar Pradesh - 201017 | State Code - 09</p>
+                        <p>GSTIN: 09AAJCK9877F1ZS</p>
                     </div>
+                    <div className="text-right px-5">
+                        <h2 className="text-2xl font-semibold">Tax Invoice</h2>
+                        <span>Date: {currentDate}</span>
+                        <p>Invoice No: <strong>{invoiceName}{invoiceNo}</strong></p>
+                    </div>
+                </div>
+
+                {/* Customer Details */}
+                <div className="grid grid-cols-2 py-10 mb-4">
                     <div>
                         <h3 className="text-lg font-semibold">Bill To:</h3>
                         <p><strong>{name || "Cash Sale"}</strong></p>
-                        <p>{phone}</p>
-                        <p>{email}</p>
+                        <p className='w-60'>{billing_address}</p>
+                        <p>{phone} || {email}</p>
                         <p>GSTIN: {gstin}</p>
-                        <p>{billing_address}</p>
                     </div>
                     <div>
-                        <p>{shipping_address}{shipping_city}{shipping_state}{shipping_pincode}</p>
-                    <p><strong>{vehicleNumberHeading}</strong> {vechicleNo}</p>
-                    <p><strong>{DispatchNoHeading}</strong> {DispatchNo}</p>
-                    <p><strong>{PODateHeading}</strong> {PODate}</p>
-                    <p><strong>{SupplyTypeHeading}</strong> {SupplyType}</p>
-                    <p><strong>{SalepersonHeading}</strong> {Saleperson}</p>
-                    <p><strong>{TransporterHeading}</strong> {Transporter}</p>
-                    <p><strong>{PONHeading}</strong> {PON}</p>
-                            </div>
-
+                        <h3 className="text-lg font-semibold">Ship To:</h3>
+                        <p><strong>{name || "Cash Sale"}</strong></p>
+                        <p className='w-60'>{shipping_address}{shipping_city}{shipping_state}{shipping_pincode}</p>
+                        <p><strong>{vehicleNumberHeading}</strong> {vechicleNo}</p>
+                        <p><strong>{DispatchNoHeading}</strong> {DispatchNo}</p>
+                        <p><strong>{PODateHeading}</strong> {PODate}</p>
+                        <p><strong>{SupplyTypeHeading}</strong> {SupplyType}</p>
+                        <p><strong>{SalepersonHeading}</strong> {Saleperson}</p>
+                        <p><strong>{TransporterHeading}</strong> {Transporter}</p>
+                        <p><strong>{PONHeading}</strong> {PON}</p>
+                    </div>
                 </div>
 
                 {/* Item Table */}
                 <table className="w-full border-collapse border border-gray-300 mb-6">
                     <thead>
                         <tr className={`${template === 'template1' ? 'bg-blue-200' : template === 'template2' ? 'bg-green-200' : 'bg-yellow-200'}`}>
+                            <th className="p-2 border border-gray-300">Sl.No</th>
                             <th className="p-2 border border-gray-300">Item Name</th>
                             <th className="p-2 border border-gray-300">Quantity</th>
                             <th className="p-2 border border-gray-300">HSN Code</th>
@@ -116,12 +129,13 @@ const SavedInvoice = () => {
                     <tbody>
                         {items.map((item, index) => (
                             <tr key={index} className="bg-white">
+                                <td className="p-2 border border-gray-300">{index + 1}</td>
                                 <td className="p-2 border border-gray-300">{item.itemName}</td>
                                 <td className="p-2 border border-gray-300">{item.quantity}</td>
                                 <td className="p-2 border border-gray-300">{item.hsn}</td>
                                 <td className="p-2 border border-gray-300">{item.gst}</td>
                                 <td className="p-2 border border-gray-300">{item.price}</td>
-                                <td className="p-2 border border-gray-300">{totalAmount}</td>
+                                <td className="p-2 border border-gray-300">{formatCurrency(item.price * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -129,6 +143,15 @@ const SavedInvoice = () => {
 
                 <div className="text-right text-xl font-semibold">
                     Total Amount: {formatCurrency(totalAmount)}
+                </div>
+
+                {/* Bank Details Section */}
+                <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <h3 className="text-lg font-semibold">Bank Details</h3>
+                    <p><strong>Bank Name:</strong> {bankName}</p>
+                    <p><strong>Account Holder:</strong> {accountHolderName}</p>
+                    <p><strong>Account Number:</strong> {accountNumber}</p>
+                    <p><strong>IFSC:</strong> {ifsc}</p>
                 </div>
             </div>
 
@@ -154,34 +177,11 @@ const SavedInvoice = () => {
                 </button>
                 <div className="text-sm text-gray-600">
                     <p>Your customers can download the invoice using this link:</p>
-                    <input
-                        type="text"
-                        readOnly
-                        value="https://one.clear.in/p/LggxMX"
-                        className="p-2 border border-gray-300 rounded w-full"
-                    />
+                    <a href={`/invoices/${invoiceNo}`} className="text-blue-600 underline">
+                        Download Invoice
+                    </a>
                 </div>
             </div>
-
-            {/* Template Selection Modal */}
-            {showTemplateModal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
-                        <h3 className="text-xl font-semibold mb-4">Select Template</h3>
-                        <ul className="space-y-2">
-                            <li><button onClick={() => handleTemplateChange('template1')} className="w-full text-left p-2 rounded-md hover:bg-gray-100">Template 1</button></li>
-                            <li><button onClick={() => handleTemplateChange('template2')} className="w-full text-left p-2 rounded-md hover:bg-gray-100">Template 2</button></li>
-                            <li><button onClick={() => handleTemplateChange('template3')} className="w-full text-left p-2 rounded-md hover:bg-gray-100">Template 3</button></li>
-                        </ul>
-                        <button
-                            className="mt-4 bg-gray-300 text-black px-4 py-2 rounded-md"
-                            onClick={() => setShowTemplateModal(false)}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

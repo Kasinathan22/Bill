@@ -106,7 +106,7 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr className="text-left text-gray-500 text-xs">
-            <th className="p-2 border border-gray-300 font-medium">#</th>
+            <th className="p-2 border border-gray-300 font-medium">Sl.No</th>
             <th className="p-2 border border-gray-300 font-medium">ITEM NAME *</th>
             <th className="p-2 border border-gray-300 font-medium">HSN *</th>
             <th className="p-2 border border-gray-300 font-medium">QUANTITY *</th>
