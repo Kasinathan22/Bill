@@ -65,6 +65,7 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
         gst: `% ${selectedItem.gst_rate}`,
         cess: `% ${selectedItem.cess_rate}`,
         unit: selectedItem.unit,
+        totalAmount: selectedItem.totalAmount
       };
     } else {
       newRows[index].itemName = value;

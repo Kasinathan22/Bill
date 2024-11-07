@@ -3,11 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toWords } from 'number-to-words';
 
-
-
-
 const SavedInvoice = () => {
-    
     const router = useRouter();
     const searchParams = useSearchParams();
     const [currentDate, setCurrentDate] = useState('');
@@ -43,7 +39,6 @@ const SavedInvoice = () => {
     
     const items = JSON.parse(searchParams.get('items') || '[]');
    
-    
     // Retrieve bank details from searchParams
     const bankName = searchParams.get('bankName');
     const accountHolderName = searchParams.get('accountHolderName');
@@ -69,7 +64,6 @@ const SavedInvoice = () => {
         window.print();
     };
 
-
     const getAmountInWords = (amount) => {
         const rupees = Math.floor(amount);
         const paise = Math.round((amount - rupees) * 100);
@@ -85,6 +79,7 @@ const SavedInvoice = () => {
             return paiseInWords;
         }
     };
+
     const totalAmountInWords = getAmountInWords(totalAmount);
 
     useEffect(() => {
@@ -92,6 +87,15 @@ const SavedInvoice = () => {
         const formattedDate = today.toLocaleDateString('en-GB');
         setCurrentDate(formattedDate);
     }, []);
+
+    const calculateTotalAmount = (price, gst, cess, discount, quantity) => {
+        const gstAmount = (price * gst) / 100;
+        const cessAmount = (price * cess) / 100;
+        const discountAmount = ((price + gstAmount + cessAmount) * discount) / 100;
+        const baseAmount = price * quantity;
+
+        return baseAmount + gstAmount + cessAmount - discountAmount;
+    };
 
     return (
         <div className="p-8 bg-gray-100 min-h-screen">
@@ -151,83 +155,56 @@ const SavedInvoice = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {items.map((item, index) => (
-                            <tr key={index} className="bg-white">
-                                <td className="p-2 border border-gray-300">{index + 1}</td>
-                                <td className="p-2 border border-gray-300">{item.itemName}</td>
-                                <td className="p-2 border border-gray-300">{item.quantity}</td>
-                                <td className="p-2 border border-gray-300">{item.hsn}</td>
-                                <td className="p-2 border border-gray-300">{item.gst}</td>
-                                <td className="p-2 border border-gray-300">{item.price}</td>
-                                <td className="p-2 border border-gray-300">{totalAmount.toFixed(2)}</td>
-                            </tr>
-                        ))}
+                        {items.map((item, index) => {
+                            const price = parseFloat(item.price.replace(/[₹,\s]/g, '')) || 0;
+                            const gst = parseFloat(item.gst.replace(/[%\s]/g, '')) || 0;
+                            const cess = parseFloat(item.cess.replace(/[%\s]/g, '')) || 0;
+                            const discount = parseFloat(item.discount) || 0;
+                            const quantity = parseFloat(item.quantity) || 1;
+
+                            const totalAmountForItem = calculateTotalAmount(price, gst, cess, discount, quantity);
+
+                            return (
+                                <tr key={index} className="bg-white">
+                                    <td className="p-2 border border-gray-300">{index + 1}</td>
+                                    <td className="p-2 border border-gray-300">{item.itemName}</td>
+                                    <td className="p-2 border border-gray-300">{item.quantity}</td>
+                                    <td className="p-2 border border-gray-300">{item.hsn}</td>
+                                    <td className="p-2 border border-gray-300">{item.gst}</td>
+                                    <td className="p-2 border border-gray-300">{item.price}</td>
+                                    <td className="p-2 border border-gray-300">{formatCurrency(totalAmountForItem)}</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
 
-                <div className="text-right text-xl font-semibold">
-                Total Amount: {formatCurrency(totalAmount)}
-            </div>
-            <div className="text-right text-base ml-auto w-80 py-">
-    <h1>Total Amount in Words: {totalAmountInWords} Rupees only</h1>
-</div>
-
-
-                {/* Bank Details Section */}
-                <div className="mt-6  ">
-                    <h3 className="text-lg font-semibold">Bank Details</h3>
-                    <p><strong>Bank Name:</strong> {bankName}</p>
-                    <p><strong>Account Holder:</strong> {accountHolderName}</p>
-                    <p><strong>Account Number:</strong> {accountNumber}</p>
-                    <p><strong>IFSC:</strong> {ifsc}</p>
+                {/* Amount in Words */}
+                <div className="text-right">
+                    <h3 className="text-lg font-semibold">Amount in Words:</h3>
+                    <p>{totalAmountInWords}</p>
                 </div>
-                <div className="grid grid-cols-2 py-5">
-      <div className="mb-4">
-        <h4 className="font-semibold mb-2">Terms & Conditions</h4>
-        <p className="text-sm">
-          GOODS ONCE SOLD WILL NOT BE TAKEN BACK.<br />
-          ALL DISPUTES WILL BE SUBJECT TO GHAZIABAD JURISDICTION.
-        </p>
-      </div>
-      <div className="flex flex-col items-end justify-end">
-        
-        <h1>Authorized Signatory</h1>
-      </div>
 
-      <div className="py-5">
-      <h4 className="font-semibold mb-2">Notes</h4>
-      <p className="text-sm">This is a computer-generated invoice hence no signature required.</p>
-      </div>
-    </div>
-     
+                {/* Total Amount */}
+                <div className="text-right">
+                    <p><strong>Total: </strong>{formatCurrency(totalAmount)}</p>
+                </div>
+
+                {/* Bank Details */}
+                {bankName && (
+                    <div>
+                        <h3 className="text-lg font-semibold">Bank Details:</h3>
+                        <p><strong>Bank Name:</strong> {bankName}</p>
+                        <p><strong>Account Holder:</strong> {accountHolderName}</p>
+                        <p><strong>Account No:</strong> {accountNumber}</p>
+                        <p><strong>IFSC:</strong> {ifsc}</p>
+                    </div>
+                )}
             </div>
 
-            {/* Actions */}
-            <div className="mt-8 flex justify-between items-center">
-                <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                    onClick={() => router.back()}
-                >
-                    Back to Invoice
-                </button>
-                <button
-                    className="bg-gray-200 text-black px-4 py-2 rounded-md"
-                    onClick={() => setShowTemplateModal(true)}
-                >
-                    Change Template
-                </button>
-                <button
-                    className="bg-green-600 text-white px-4 py-2 rounded-md"
-                    onClick={handlePrint}
-                >
-                    Print Invoice
-                </button>
-                <div className="text-sm text-gray-600">
-                    <p>Your customers can download the invoice using this link:</p>
-                    <a href={`/invoices/${invoiceNo}`} className="text-blue-600 underline">
-                        Download Invoice
-                    </a>
-                </div>
+            <div className="flex justify-between pt-5">
+                <button onClick={handlePrint} className="bg-blue-500 text-white p-2 rounded-md">Print</button>
+                <button onClick={() => setShowTemplateModal(true)} className="bg-blue-500 text-white p-2 rounded-md">Change Template</button>
             </div>
         </div>
     );
