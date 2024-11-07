@@ -1,11 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
+import { toWords } from 'number-to-words';
+
+
+
 
 const SavedInvoice = () => {
+    
     const router = useRouter();
     const searchParams = useSearchParams();
     const [currentDate, setCurrentDate] = useState('');
+    const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
     
     // Retrieve general invoice and customer details from searchParams
     const name = searchParams.get('name');
@@ -36,7 +42,7 @@ const SavedInvoice = () => {
     const PONHeading = searchParams.get('PONHeading');
     
     const items = JSON.parse(searchParams.get('items') || '[]');
-    const totalAmount = parseFloat(searchParams.get('totalAmount') || '0');
+   
     
     // Retrieve bank details from searchParams
     const bankName = searchParams.get('bankName');
@@ -62,6 +68,24 @@ const SavedInvoice = () => {
     const handlePrint = () => {
         window.print();
     };
+
+
+    const getAmountInWords = (amount) => {
+        const rupees = Math.floor(amount);
+        const paise = Math.round((amount - rupees) * 100);
+
+        const rupeesInWords = rupees > 0 ? `${toWords(rupees)} Rupees` : '';
+        const paiseInWords = paise > 0 ? `${toWords(paise)} Paise` : '';
+
+        if (rupeesInWords && paiseInWords) {
+            return `${rupeesInWords} and ${paiseInWords}`;
+        } else if (rupeesInWords) {
+            return rupeesInWords;
+        } else {
+            return paiseInWords;
+        }
+    };
+    const totalAmountInWords = getAmountInWords(totalAmount);
 
     useEffect(() => {
         const today = new Date();
@@ -135,15 +159,19 @@ const SavedInvoice = () => {
                                 <td className="p-2 border border-gray-300">{item.hsn}</td>
                                 <td className="p-2 border border-gray-300">{item.gst}</td>
                                 <td className="p-2 border border-gray-300">{item.price}</td>
-                                <td className="p-2 border border-gray-300">{formatCurrency(item.price * item.quantity)}</td>
+                                <td className="p-2 border border-gray-300">{totalAmount.toFixed(2)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
 
                 <div className="text-right text-xl font-semibold">
-                    Total Amount: {formatCurrency(totalAmount)}
-                </div>
+                Total Amount: {formatCurrency(totalAmount)}
+            </div>
+            <div className="text-right text-base ml-auto w-80 py-">
+    <h1>Total Amount in Words: {totalAmountInWords} Rupees only</h1>
+</div>
+
 
                 {/* Bank Details Section */}
                 <div className="mt-6  ">

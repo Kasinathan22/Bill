@@ -6,7 +6,7 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
   const [rows, setRows] = useState(items.length > 0 ? items : [{
     itemName: '',
     hsn: '',
-    quantity: '',
+    quantity: '1',
     unit: '',
     price: '₹ 0.0',
     discount: '0',
@@ -34,7 +34,7 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
       {
         itemName: '',
         hsn: '',
-        quantity: '',
+        quantity: '1',
         unit: '',
         price: '₹ 0.0',
         discount: '0',
@@ -78,12 +78,13 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
     setRows(newRows);
   };
 
-  const calculateTotalAmount = (price, gst, cess, discount) => {
+  const calculateTotalAmount = (price, gst, cess, discount, quantity) => {
     const gstAmount = (price * gst) / 100;
     const cessAmount = (price * cess) / 100;
     const discountAmount = ((price + gstAmount + cessAmount) * discount) / 100;
+    const baseAmount = price * quantity;
 
-    return price + gstAmount + cessAmount - discountAmount;
+    return baseAmount + gstAmount + cessAmount - discountAmount;
   };
 
   useEffect(() => {
@@ -93,8 +94,9 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
       const gst = parseFloat(row.gst.replace(/[%\s]/g, '')) || 0;
       const cess = parseFloat(row.cess.replace(/[%\s]/g, '')) || 0;
       const discount = parseFloat(row.discount) || 0;
+      const quantity = parseFloat(row.quantity) || 1; // Default to 1 if no quantity is provided
 
-      return acc + calculateTotalAmount(price, gst, cess, discount);
+      return acc + calculateTotalAmount(price, gst, cess, discount, quantity);
     }, 0);
     setTotalAmount(total);
   }, [rows, setTotalAmount, setItems]);
@@ -126,8 +128,9 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
             const gst = parseFloat(row.gst.replace(/[%\s]/g, '')) || 0;
             const cess = parseFloat(row.cess.replace(/[%\s]/g, '')) || 0;
             const discount = parseFloat(row.discount) || 0;
+            const quantity = parseFloat(row.quantity) || 1;
 
-            const totalAmount = calculateTotalAmount(price, gst, cess, discount);
+            const totalAmount = calculateTotalAmount(price, gst, cess, discount, quantity);
 
             return (
               <tr key={index} className="bg-gray-50 text-gray-700">
@@ -211,22 +214,14 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
                 <td className="p-2 border border-gray-300">{row.price}</td>
                 <td className="p-2 border border-gray-300">{totalAmount.toFixed(2)}</td>
                 <td className="p-2 border border-gray-300">
-                  <button
-                    className="text-red-500"
-                    onClick={() => handleDeleteRow(index)}
-                  >
-                    Delete
-                  </button>
+                  <button onClick={() => handleDeleteRow(index)} className="text-red-500">Delete</button>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-
-      <div className="p-2 border-t mt-4 text-center">
-        <button onClick={handleAddRow} className="text-blue-600">+ ADD ITEM</button>
-      </div>
+      <button onClick={handleAddRow} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Add Row</button>
     </div>
   );
 }

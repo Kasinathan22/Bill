@@ -13,6 +13,8 @@
     "install": "^0.13.0",
     "lodash.debounce": "^4.0.8",
     "next": "14.2.15",
+    "num2words": "^1.0.2",
+    "number-to-words": "^1.2.4",
     "react": "^18",
     "react-dom": "^18"
   },
