@@ -378,7 +378,6 @@
 
 
 
-
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -389,6 +388,7 @@ export default function Hero() {
   const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
   const [filterDate, setFilterDate] = useState('')
+  const [customerName, setCustomerName] = useState('')
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -406,45 +406,73 @@ export default function Hero() {
     fetchInvoices()
   }, [])
 
-  const filteredInvoices = filterDate
-    ? invoices.filter((invoice) => invoice.capture_date.startsWith(filterDate))
-    : invoices
+  const filteredInvoices = invoices.filter((invoice) =>
+    (!filterDate || invoice.capture_date.startsWith(filterDate)) &&
+    (!customerName || (invoice.customer_name && invoice.customer_name.toLowerCase().includes(customerName.toLowerCase())))
+  )
+  
+  const clearFilters = () => {
+    setFilterDate('')
+    setCustomerName('')
+  }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+    <div className=" min-h-screen bg-white">
       {/* Left sidebar */}
+
+      <div className='pt-5'>
+      <h1 className='text-xl pl-5 '>Invoice</h1>
+      </div>
+      <div className=" "></div>
+<h1 className=" border-t border-gray-300 w-full">
+
+</h1>
+      <div className="flex flex-col md:flex-row">
       <div className="w-full md:w-64 p-4 bg-white shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Filter Invoices</h2>
-        <div className="space-y-2">
-          <label htmlFor="date-filter" className="block text-sm font-medium text-gray-700">
-            Select Date
-          </label>
-          <input
-            type="date"
-            id="date-filter"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {filterDate && (
-            <button
-              onClick={() => setFilterDate('')}
-              className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Clear Filter
-            </button>
-          )}
+        <h2 className="text-lg font-thin mb-4 pt-5">Filter Invoices</h2>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="date-filter" className="block text-sm font-medium text-gray-700">
+              Select Date
+            </label>
+            <input
+              type="date"
+              id="date-filter"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="w-full font-thin  px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="customer-name" className="block text-sm font-medium text-gray-700">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              id="customer-name"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Search here..."
+            />
+          </div>
+          <button
+            onClick={clearFilters}
+            className="w-full px-4 py-2 mt-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Clear Filters
+          </button>
         </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 p-4 md:p-8">
-        <div className='py-5 right-0'>
-        <Link href='/Createinvoice'>
-           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Create an Invoice
-         </button>
-        </Link>
+        <div className="pb-3">
+          <Link href="/Createinvoice">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Create an Invoice
+            </button>
+          </Link>
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Captured Invoices</h1>
         {loading ? (
@@ -452,20 +480,26 @@ export default function Hero() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
           </div>
         ) : (
-          <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+          <div className="bg-white  shadow-md rounded-lg overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice No</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">Invoice No</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">Total Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">Customer Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">Paid Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice Image</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredInvoices.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invoice.invoice_no}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.capture_date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">{invoice.invoice_no}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">{invoice.capture_date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">{invoice.total_amount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">{invoice.customer_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">{invoice.paid_status}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <a
                         href={`data:image/png;base64,${invoice.image_data}`}
@@ -481,6 +515,7 @@ export default function Hero() {
             </table>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

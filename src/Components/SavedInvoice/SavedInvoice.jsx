@@ -592,6 +592,9 @@
 // export default SavedInvoice;
 
 
+
+
+
 'use client'
 
 import React, { useState, useEffect } from "react"
@@ -600,6 +603,9 @@ import { toWords } from 'number-to-words'
 import axios from "axios"
 import html2canvas from 'html2canvas'
 import { toast } from "sonner"
+import Link from "next/link"
+
+
 
 export default function SavedInvoice() {
   const [capturing, setCapturing] = useState(false)
@@ -687,6 +693,9 @@ export default function SavedInvoice() {
       const formData = new FormData()
       formData.append('screenshot', imageDataUrl)
       formData.append('invoiceNo', invoiceNo)
+      formData.append('totalAmount', totalAmount.toString())
+      formData.append('name', name)
+      formData.append('paidStatus', isPaid ? 'Paid' : 'Unpaid')
 
       const response = await axios.post('http://localhost/php-backend/save_webpage.php', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -700,7 +709,24 @@ export default function SavedInvoice() {
       }
     } catch (error) {
       console.error("Error capturing invoice:", error)
-      toast.error(`Failed to capture invoice: ${error.message}`)
+      let errorMessage = "An unexpected error occurred"
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error("Error data:", error.response.data)
+          console.error("Error status:", error.response.status)
+          console.error("Error headers:", error.response.headers)
+          errorMessage = error.response.data.error || errorMessage
+        } else if (error.request) {
+          console.error("No response received:", error.request)
+          errorMessage = "No response received from the server"
+        } else {
+          console.error("Error message:", error.message)
+          errorMessage = error.message
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+      toast.error(`Failed to capture invoice: ${errorMessage}`)
     } finally {
       setCapturing(false)
     }
@@ -723,15 +749,12 @@ export default function SavedInvoice() {
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
-      <div id="invoice-content">
-        {/* Header */}
-        <div className={`${template === 'template1' ? 'bg-blue-900' : 'bg-green-900'} text-white p-6 rounded-t-md`}>
-          <h1 className="text-5xl font-bold py-5">Kashgar Internet Private <br />Limited</h1>
+      <div id="invoice-content" className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+        <div className={`${template === 'template1' ? 'bg-blue-600' : 'bg-green-600'} text-white p-6`}>
+          <h1 className="text-4xl font-bold">Kashgar Internet Private Limited</h1>
         </div>
-
-        {/* Invoice Details */}
-        <div className="p-6 bg-white shadow-md">
-          <div className="grid grid-cols-2 py-5">
+        <div className="p-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <p>801, F Block, 8th Floor, Charms Castle, Ghaziabad, UP</p>
               <p>GSTIN: 09AAJCK9877F1ZS</p>
@@ -743,8 +766,7 @@ export default function SavedInvoice() {
             </div>
           </div>
 
-          {/* Customer Details */}
-          <div className="grid grid-cols-2 py-4">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <h3 className="text-lg font-semibold">Bill To:</h3>
               <p><strong>{name}</strong></p>
@@ -759,10 +781,9 @@ export default function SavedInvoice() {
             </div>
           </div>
 
-          {/* Item Table */}
           <table className="w-full border-collapse border border-gray-300 mb-6">
             <thead>
-              <tr className="bg-blue-200">
+              <tr className="bg-gray-100">
                 <th className="p-2 border">Sl.No</th>
                 <th className="p-2 border">Item Name</th>
                 <th className="p-2 border">Quantity</th>
@@ -773,28 +794,28 @@ export default function SavedInvoice() {
               </tr>
             </thead>
             <tbody>
-            {items.map((item, index) => {
-              const price = parseFloat(item.price.replace(/[^0-9.-]+/g, "")) || 0
-              const gst = parseFloat(item.gst.replace(/[^0-9.-]+/g, "")) || 0
-              const cess = parseFloat(item.cess.replace(/[^0-9.-]+/g, "")) || 0
-              const discount = parseFloat(item.discount) || 0
-              const quantity = parseFloat(item.quantity) || 1
+              {items.map((item, index) => {
+                const price = parseFloat(item.price.replace(/[^0-9.-]+/g, "")) || 0
+                const gst = parseFloat(item.gst.replace(/[^0-9.-]+/g, "")) || 0
+                const cess = parseFloat(item.cess.replace(/[^0-9.-]+/g, "")) || 0
+                const discount = parseFloat(item.discount) || 0
+                const quantity = parseFloat(item.quantity) || 1
 
-              const total = calculateTotalAmount(item.price, gst, cess, discount, quantity)
+                const total = calculateTotalAmount(item.price, gst, cess, discount, quantity)
 
-              return (
-                <tr key={index} className="bg-white">
-                  <td className="p-2 border">{index + 1}</td>
-                  <td className="p-2 border">{item.itemName}</td>
-                  <td className="p-2 border">{quantity}</td>
-                  <td className="p-2 border">{item.hsn}</td>
-                  <td className="p-2 border">{`${gst}%`}</td>
-                  <td className="p-2 border">{formatCurrency(price)}</td>
-                  <td className="p-2 border">{formatCurrency(total)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
+                return (
+                  <tr key={index}>
+                    <td className="p-2 border">{index + 1}</td>
+                    <td className="p-2 border">{item.itemName}</td>
+                    <td className="p-2 border">{quantity}</td>
+                    <td className="p-2 border">{item.hsn}</td>
+                    <td className="p-2 border">{`${gst}%`}</td>
+                    <td className="p-2 border">{formatCurrency(price)}</td>
+                    <td className="p-2 border">{formatCurrency(total)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
             <tfoot>
               <tr>
                 <td colSpan="6" className="p-2 border font-semibold">Total</td>
@@ -803,29 +824,51 @@ export default function SavedInvoice() {
             </tfoot>
           </table>
 
-          {/* Total Amount in Words */}
-          <div className="text-right font-semibold">
+          <div className="text-right font-semibold mb-4">
             Total in Words: {totalAmountInWords}
           </div>
         </div>
-
-        {/* Footer Section */}
-        <div className="p-6 bg-gray-200 text-center">
-          <p>Bank Details: {bankName} | Account Holder: {accountHolderName} | Account Number: {accountNumber} | IFSC: {ifsc}</p>
-          <p>Thank you for your business!</p>
+        <div className="bg-gray-100 p-4">
+          <p className="text-sm text-center">
+            Bank Details: {bankName} | Account Holder: {accountHolderName} | Account Number: {accountNumber} | IFSC: {ifsc}
+            <br />Thank you for your business!
+          </p>
         </div>
       </div>
 
-      {/* Capture and Save Button */}
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-between items-center mb-4">
         <button
           onClick={captureAndStoreWebpage}
           disabled={capturing}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
         >
           {capturing ? "Capturing..." : "Capture and Save"}
         </button>
+
+        <div className="flex items-center space-x-2">
+          <label htmlFor="paid-status" className="font-medium">Payment Status:</label>
+          <button
+            id="paid-status"
+            onClick={togglePaymentStatus}
+            className={`py-2 px-4 rounded font-bold ${
+              isPaid 
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            }`}
+          >
+            {isPaid ? 'Paid' : 'Unpaid'}
+          </button>
+        </div>
+        <div>
+        <Link href='/Createinvoice'>
+           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Back
+         </button>
+        </Link>
+        </div>
       </div>
+
+     
     </div>
   )
 }

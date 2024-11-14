@@ -22,7 +22,7 @@ if ($conn->connect_error) {
 
 try {
     // Query to select id, invoice_no, capture_date, and image_data (assumed to be base64-encoded)
-    $sql = "SELECT id, invoice_no, capture_date, image_data FROM webpage_captures ORDER BY capture_date DESC";
+    $sql = "SELECT id, invoice_no, capture_date, total_amount, customer_name, paid_status, image_data FROM webpage_captures ORDER BY capture_date DESC";
     $result = $conn->query($sql);
     
     if (!$result) {
