@@ -16,6 +16,7 @@ export default function ItemEntry({ setTotalAmount = () => {}, items = [], setIt
     taxableAmt: '₹ 0',
     amount: '₹ 0',
   }]);
+  
 
   const [availableItems, setAvailableItems] = useState([]);
 
